@@ -13,7 +13,7 @@ pub fn build(b: *std.Build) !void {
         .target = target,
         .optimize = optimize,
     });
-    lib.root_module.addImport("esp_idf", idf_wrapped_modules(b));
+    lib.root_module.addImport("zig_idf", idf_wrapped_modules(b));
 
     _ = b.addModule("zig_idf", .{
         .root_source_file = b.path("imports/idf.zig"),
