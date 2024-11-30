@@ -9,15 +9,11 @@ pub fn build(b: *std.Build) !void {
 
     const lib = b.addStaticLibrary(.{
         .name = "zig_idf",
-        .root_source_file = b.path("imports/idf.zig"),
+        .root_source_file = b.path("main.zig"),
         .target = target,
         .optimize = optimize,
     });
     lib.root_module.addImport("zig_idf", idf_wrapped_modules(b));
-
-    _ = b.addModule("zig_idf", .{
-        .root_source_file = b.path("imports/idf.zig"),
-    });
 
     lib.linkLibC(); // stubs for libc
 
@@ -601,14 +597,6 @@ const riscv_targets = &[_]std.Target.Query{
         .os_tag = .freestanding,
         .abi = .none,
         .cpu_features_add = std.Target.riscv.featureSet(&.{ .m, .a, .c, .zifencei, .zicsr }),
-    },
-    // esp32-p4 have .xesppie cpu-feature (espressif vendor extension)
-    .{
-        .cpu_arch = .riscv32,
-        .cpu_model = .{ .explicit = &std.Target.riscv.cpu.esp32p4 },
-        .os_tag = .freestanding,
-        .abi = .eabihf,
-        .cpu_features_sub = std.Target.riscv.featureSet(&.{ .zca, .zcb, .zcmt, .zcmp }),
     },
 };
 const xtensa_targets = &[_]std.Target.Query{
