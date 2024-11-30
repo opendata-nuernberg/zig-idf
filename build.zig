@@ -9,7 +9,7 @@ pub fn build(b: *std.Build) !void {
 
     const lib = b.addStaticLibrary(.{
         .name = "zig_idf",
-        .root_source_file = b.path("main.zig"),
+        .root_source_file = b.path("imports/idf.zig"),
         .target = target,
         .optimize = optimize,
     });
@@ -472,7 +472,7 @@ pub fn idf_wrapped_modules(b: *std.Build) *std.Build.Module {
             },
         },
     });
-    return b.addModule("esp_idf", .{
+    return b.addModule("zig_idf", .{
         .root_source_file = b.path(b.pathJoin(&.{
             src_path,
             "imports",
