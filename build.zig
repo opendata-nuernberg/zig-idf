@@ -8,12 +8,17 @@ pub fn build(b: *std.Build) !void {
     const optimize = b.standardOptimizeOption(.{});
 
     const lib = b.addStaticLibrary(.{
-        .name = "app_zig",
-        .root_source_file = b.path("main/app.zig"),
+        .name = "zig_idf",
+        .root_source_file = b.path("imports/idf.zig"),
         .target = target,
         .optimize = optimize,
     });
     lib.root_module.addImport("esp_idf", idf_wrapped_modules(b));
+
+    _ = b.addModule("zig_idf", .{
+        .root_source_file = b.path("imports/idf.zig"),
+    });
+
     lib.linkLibC(); // stubs for libc
 
     try includeDeps(b, lib);
