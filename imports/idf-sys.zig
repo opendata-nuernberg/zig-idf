@@ -5671,9 +5671,9 @@ pub const soc_periph_i2s_clk_src_t = enum(c_int) {
     I2S_CLK_SRC_EXTERNAL = -1,
 };
 pub const soc_periph_i2c_clk_src_t = enum(c_uint) {
-    I2C_CLK_SRC_XTAL = 11,
-    I2C_CLK_SRC_RC_FAST = 9,
-    //I2C_CLK_SRC_DEFAULT = 11,
+    I2C_CLK_SRC_XTAL = 10,
+    I2C_CLK_SRC_RC_FAST = 8,
+    //I2C_CLK_SRC_DEFAULT = 10,
 };
 pub const soc_periph_spi_clk_src_t = enum(c_uint) {
     //SPI_CLK_SRC_DEFAULT = 4,
@@ -6110,7 +6110,7 @@ pub const i2c_master_bus_config_t = extern struct {
     i2c_port: i2c_port_num_t = std.mem.zeroes(i2c_port_num_t),
     sda_io_num: gpio_num_t = std.mem.zeroes(gpio_num_t),
     scl_io_num: gpio_num_t = std.mem.zeroes(gpio_num_t),
-    clk_source: i2c_clock_source_t = std.mem.zeroes(i2c_clock_source_t),
+    clk_source: i2c_clock_source_t = i2c_clock_source_t.I2C_CLK_SRC_XTAL,
     glitch_ignore_cnt: u8 = std.mem.zeroes(u8),
     intr_priority: c_int = std.mem.zeroes(c_int),
     trans_queue_depth: usize = std.mem.zeroes(usize),
