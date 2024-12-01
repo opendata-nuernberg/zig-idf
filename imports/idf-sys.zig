@@ -6100,6 +6100,12 @@ pub const i2c_slave_rx_done_event_data_t = extern struct {
     buffer: [*:0]u8 = std.mem.zeroes([*:0]u8),
 };
 pub const i2c_slave_received_callback_t = ?*const fn (i2c_slave_dev_handle_t, [*c]const i2c_slave_rx_done_event_data_t, ?*anyopaque) callconv(.C) bool;
+
+const i2c_master_bus_config_flags_t = extern struct {
+    enable_internal_pullup: bool = false,
+    allow_pd: bool = false,
+};
+
 pub const i2c_master_bus_config_t = extern struct {
     i2c_port: i2c_port_num_t = std.mem.zeroes(i2c_port_num_t),
     sda_io_num: gpio_num_t = std.mem.zeroes(gpio_num_t),
@@ -6108,7 +6114,7 @@ pub const i2c_master_bus_config_t = extern struct {
     glitch_ignore_cnt: u8 = std.mem.zeroes(u8),
     intr_priority: c_int = std.mem.zeroes(c_int),
     trans_queue_depth: usize = std.mem.zeroes(usize),
-    flags: opaque {} = std.mem.zeroes(opaque {}),
+    flags: i2c_master_bus_config_flags_t = .{},
 };
 pub const i2c_device_config_t = extern struct {
     dev_addr_length: i2c_addr_bit_len_t = std.mem.zeroes(i2c_addr_bit_len_t),
