@@ -14,6 +14,12 @@ This project aims to integrate Zig language and toolchain with the [Espressif Io
 - [Zig](https://ziglang.org/download) toolchain - v0.13.0 or master
 - [ESP-IDF](https://github.com/espressif/esp-idf) - v4.4.x or v5.x or master
 
+## How to build
+```
+cd examples/blink
+idf.py build
+```
+
 ### Targets Allowed
 
 | target | commands |
