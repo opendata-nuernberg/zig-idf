@@ -17,11 +17,10 @@ pub fn build(b: *std.Build) !void {
 
     lib.linkLibC(); // stubs for libc
 
-    try includeDeps(b, lib);
     b.installArtifact(lib);
 }
 
-fn includeDeps(b: *std.Build, lib: *std.Build.Step.Compile) !void {
+pub fn includeDeps(b: *std.Build, lib: *std.Build.Step.Compile) !void {
     const include_dirs = std.process.getEnvVarOwned(b.allocator, "INCLUDE_DIRS") catch "";
     if (!std.mem.eql(u8, include_dirs, "")) {
         var it_inc = std.mem.tokenizeAny(u8, include_dirs, ";");
