@@ -47,7 +47,7 @@ pub const esp_reset_reason_t = enum(c_uint) {
     ESP_RST_USB = 11,
     ESP_RST_JTAG = 12,
 };
-pub const shutdown_handler_t = ?*const fn () callconv(.C) void;
+pub const shutdown_handler_t = ?*const fn () callconv(.c) void;
 pub extern fn esp_register_shutdown_handler(handle: shutdown_handler_t) esp_err_t;
 pub extern fn esp_unregister_shutdown_handler(handle: shutdown_handler_t) esp_err_t;
 pub extern fn esp_restart() noreturn;
@@ -102,7 +102,7 @@ pub extern fn esp_rom_software_reset_system() void;
 pub extern fn esp_rom_software_reset_cpu(cpu_no: c_int) void;
 pub extern fn esp_rom_printf(fmt: [*:0]const u8, ...) c_int;
 pub extern fn esp_rom_delay_us(us: u32) void;
-pub extern fn esp_rom_install_channel_putc(channel: c_int, putc: ?*const fn (u8) callconv(.C) void) void;
+pub extern fn esp_rom_install_channel_putc(channel: c_int, putc: ?*const fn (u8) callconv(.c) void) void;
 pub extern fn esp_rom_install_uart_printf() void;
 pub extern fn esp_rom_get_reset_reason(cpu_no: c_int) soc_reset_reason_t;
 pub extern fn esp_rom_route_intr_matrix(cpu_core: c_int, periph_intr_id: u32, cpu_intr_num: u32) void;
@@ -116,7 +116,7 @@ pub const esp_log_level_t = enum(c_uint) {
     ESP_LOG_DEBUG = 4,
     ESP_LOG_VERBOSE = 5,
 };
-pub const vprintf_like_t = ?*const fn ([*:0]const u8, va_list) callconv(.C) c_int;
+pub const vprintf_like_t = ?*const fn ([*:0]const u8, va_list) callconv(.c) c_int;
 pub extern var esp_log_default_level: esp_log_level_t;
 pub extern fn esp_log_level_set(tag: [*:0]const u8, level: esp_log_level_t) void;
 pub extern fn esp_log_level_get(tag: [*:0]const u8) esp_log_level_t;
@@ -349,7 +349,7 @@ pub extern fn xthal_set_vpri(vpri: c_uint) c_uint;
 pub extern fn xthal_get_vpri() c_uint;
 pub extern fn xthal_set_vpri_intlevel(intlevel: c_uint) c_uint;
 pub extern fn xthal_set_vpri_lock() c_uint;
-pub const XtHalVoidFunc = fn () callconv(.C) void;
+pub const XtHalVoidFunc = fn () callconv(.c) void;
 pub extern var Xthal_tram_pending: c_uint;
 pub extern var Xthal_tram_enabled: c_uint;
 pub extern var Xthal_tram_sync: c_uint;
@@ -589,16 +589,16 @@ pub const XtSolFrame = extern struct {
     a14: c_long = std.mem.zeroes(c_long),
     a15: c_long = std.mem.zeroes(c_long),
 };
-pub const xt_handler = ?*const fn (?*anyopaque) callconv(.C) void;
-pub const xt_exc_handler = ?*const fn ([*c]XtExcFrame) callconv(.C) void;
+pub const xt_handler = ?*const fn (?*anyopaque) callconv(.c) void;
+pub const xt_exc_handler = ?*const fn ([*c]XtExcFrame) callconv(.c) void;
 pub extern fn xt_set_exception_handler(n: c_int, f: xt_exc_handler) xt_exc_handler;
 pub extern fn xt_set_interrupt_handler(n: c_int, f: xt_handler, arg: ?*anyopaque) xt_handler;
 pub extern fn xt_ints_on(mask: c_uint) void;
 pub extern fn xt_ints_off(mask: c_uint) void;
-pub fn xt_set_intset(arg: c_uint) callconv(.C) void {
+pub fn xt_set_intset(arg: c_uint) callconv(.c) void {
     xthal_set_intset(arg);
 }
-pub fn xt_set_intclear(arg: c_uint) callconv(.C) void {
+pub fn xt_set_intclear(arg: c_uint) callconv(.c) void {
     xthal_set_intclear(arg);
 }
 pub extern fn xt_get_interrupt_handler_arg(n: c_int) ?*anyopaque;
@@ -643,14 +643,14 @@ pub const XtosCoreState = extern struct {
     ncp: [48]u8 align(4) = std.mem.zeroes([48]u8),
     cp0: [72]u8 align(4) = std.mem.zeroes([72]u8),
 };
-pub const _xtos_handler_func = fn () callconv(.C) void;
+pub const _xtos_handler_func = fn () callconv(.c) void;
 pub const _xtos_handler = ?*const _xtos_handler_func;
 pub extern fn _xtos_ints_off(mask: c_uint) c_uint;
 pub extern fn _xtos_ints_on(mask: c_uint) c_uint;
-pub fn _xtos_interrupt_enable(intnum: c_uint) callconv(.C) void {
+pub fn _xtos_interrupt_enable(intnum: c_uint) callconv(.c) void {
     _ = _xtos_ints_on(@as(c_uint, 1) << @intCast(intnum));
 }
-pub fn _xtos_interrupt_disable(intnum: c_uint) callconv(.C) void {
+pub fn _xtos_interrupt_disable(intnum: c_uint) callconv(.c) void {
     _ = _xtos_ints_off(@as(c_uint, 1) << @intCast(intnum));
 }
 pub extern fn _xtos_set_intlevel(intlevel: c_int) c_uint;
@@ -685,7 +685,7 @@ pub extern fn xt_utils_get_sp() ?*anyopaque; // esp-idf/components/xtensa/includ
 // esp-idf/components/xtensa/include/xt_utils.h:68:28: warning: unable to translate function, demoted to extern
 pub extern fn xt_utils_get_cycle_count() u32; // esp-idf/components/xtensa/include/xt_instr_macros.h:12:30: warning: TODO implement translation of stmt class GCCAsmStmtClass
 // esp-idf/components/xtensa/include/xt_utils.h:75:20: warning: unable to translate function, demoted to extern
-pub extern fn xt_utils_set_cycle_count(ccount: u32) callconv(.C) void; // esp-idf/components/xtensa/include/xt_utils.h:82:5: warning: TODO implement translation of stmt class GCCAsmStmtClass
+pub extern fn xt_utils_set_cycle_count(ccount: u32) callconv(.c) void; // esp-idf/components/xtensa/include/xt_utils.h:82:5: warning: TODO implement translation of stmt class GCCAsmStmtClass
 // esp-idf/components/xtensa/include/xt_utils.h:80:24: warning: unable to translate function, demoted to extern
 pub extern fn xt_utils_wait_for_intr() void; // esp-idf/components/xtensa/include/xt_utils.h:95:5: warning: TODO implement translation of stmt class GCCAsmStmtClass
 // esp-idf/components/xtensa/include/xt_utils.h:93:24: warning: unable to translate function, demoted to extern
@@ -706,7 +706,7 @@ pub extern fn xt_utils_dbgr_is_attached() bool; // esp-idf/components/xtensa/inc
 pub extern fn xt_utils_dbgr_break() void; // esp-idf/components/xtensa/include/xt_utils.h:216:5: warning: TODO implement translation of stmt class GCCAsmStmtClass
 // esp-idf/components/xtensa/include/xt_utils.h:205:24: warning: unable to translate function, demoted to extern
 pub extern fn xt_utils_compare_and_set(addr: [*c]volatile u32, compare_value: u32, new_value: u32) bool;
-pub const intr_handler_t = ?*const fn (?*anyopaque) callconv(.C) void;
+pub const intr_handler_t = ?*const fn (?*anyopaque) callconv(.c) void;
 pub const intr_handle_data_t = opaque {};
 pub const intr_handle_t = ?*intr_handle_data_t;
 pub const esp_intr_cpu_affinity_t = enum(c_uint) {
@@ -730,8 +730,8 @@ pub extern fn esp_intr_enable_source(inum: c_int) void;
 pub extern fn esp_intr_disable_source(inum: c_int) void;
 // esp-idf/components/esp_hw_support/include/esp_intr_alloc.h:300:12: warning: TODO implement function '__builtin_ffs' in std.zig.c_builtins
 // esp-idf/components/esp_hw_support/include/esp_intr_alloc.h:298:19: warning: unable to translate function, demoted to extern
-pub extern fn esp_intr_flags_to_level(flags: c_int) callconv(.C) c_int;
-pub fn esp_intr_level_to_flags(level: c_int) callconv(.C) c_int {
+pub extern fn esp_intr_flags_to_level(flags: c_int) callconv(.c) c_int;
+pub fn esp_intr_level_to_flags(level: c_int) callconv(.c) c_int {
     return if (level > @as(c_int, 0)) (@as(c_int, 1) << @intCast(level)) & (((((((@as(c_int, 1) << @intCast(1)) | (@as(c_int, 1) << @intCast(2))) | (@as(c_int, 1) << @intCast(3))) | (@as(c_int, 1) << @intCast(4))) | (@as(c_int, 1) << @intCast(5))) | (@as(c_int, 1) << @intCast(6))) | (@as(c_int, 1) << @intCast(7))) else @as(c_int, 0);
 }
 pub extern fn esp_intr_dump(stream: ?*std.c.FILE) esp_err_t;
@@ -746,7 +746,7 @@ pub const esp_cpu_intr_desc_t = extern struct {
     type: esp_cpu_intr_type_t = std.mem.zeroes(esp_cpu_intr_type_t),
     flags: u32 = std.mem.zeroes(u32),
 };
-pub const esp_cpu_intr_handler_t = ?*const fn (?*anyopaque) callconv(.C) void;
+pub const esp_cpu_intr_handler_t = ?*const fn (?*anyopaque) callconv(.c) void;
 pub const esp_cpu_watchpoint_trigger_t = enum(c_uint) {
     ESP_CPU_WATCHPOINT_LOAD = 0,
     ESP_CPU_WATCHPOINT_STORE = 1,
@@ -821,10 +821,10 @@ pub extern fn esp_backtrace_get_next_frame(frame: [*c]esp_backtrace_frame_t) boo
 pub extern fn esp_backtrace_print_from_frame(depth: c_int, frame: [*c]const esp_backtrace_frame_t, panic: bool) esp_err_t;
 pub extern fn esp_backtrace_print(depth: c_int) esp_err_t;
 pub extern fn esp_backtrace_print_all_tasks(depth: c_int) esp_err_t;
-pub fn esp_set_watchpoint(no: c_int, adr: ?*anyopaque, size: c_int, flag: c_int) callconv(.C) esp_err_t {
+pub fn esp_set_watchpoint(no: c_int, adr: ?*anyopaque, size: c_int, flag: c_int) callconv(.c) esp_err_t {
     return esp_cpu_set_watchpoint(no, adr, @as(usize, @bitCast(size)), @as(c_uint, @bitCast(flag)));
 }
-pub fn esp_clear_watchpoint(no: c_int) callconv(.C) void {
+pub fn esp_clear_watchpoint(no: c_int) callconv(.c) void {
     _ = esp_cpu_clear_watchpoint(no);
 }
 
@@ -1637,7 +1637,7 @@ pub const gpio_drive_cap_t = enum(c_uint) {
     GPIO_DRIVE_CAP_3 = 3,
     GPIO_DRIVE_CAP_MAX = 4,
 };
-pub const esp_deep_sleep_cb_t = ?*const fn () callconv(.C) void;
+pub const esp_deep_sleep_cb_t = ?*const fn () callconv(.c) void;
 pub const esp_sleep_ext1_wakeup_mode_t = enum(c_uint) {
     ESP_EXT1_WAKEUP_ALL_LOW = 0,
     ESP_EXT1_WAKEUP_ANY_HIGH = 1,
@@ -1710,7 +1710,7 @@ pub extern fn esp_deep_sleep_register_hook(new_dslp_cb: esp_deep_sleep_cb_t) esp
 pub extern fn esp_deep_sleep_deregister_hook(old_dslp_cb: esp_deep_sleep_cb_t) void;
 pub extern fn esp_sleep_get_wakeup_cause() esp_sleep_wakeup_cause_t;
 pub extern fn esp_wake_deep_sleep() void;
-pub const esp_deep_sleep_wake_stub_fn_t = ?*const fn () callconv(.C) void;
+pub const esp_deep_sleep_wake_stub_fn_t = ?*const fn () callconv(.c) void;
 pub extern fn esp_set_deep_sleep_wake_stub(new_stub: esp_deep_sleep_wake_stub_fn_t) void;
 pub extern fn esp_set_deep_sleep_wake_stub_default_entry() void;
 pub extern fn esp_get_deep_sleep_wake_stub() esp_deep_sleep_wake_stub_fn_t;
@@ -1718,7 +1718,7 @@ pub extern fn esp_default_wake_deep_sleep() void;
 pub extern fn esp_deep_sleep_disable_rom_logging() void;
 pub extern fn esp_sleep_config_gpio_isolate() void;
 pub extern fn esp_sleep_enable_gpio_switch(enable: bool) void;
-pub const TaskFunction_t = ?*const fn (?*anyopaque) callconv(.C) void;
+pub const TaskFunction_t = ?*const fn (?*anyopaque) callconv(.c) void;
 pub const spinlock_t = extern struct {
     owner: u32 = std.mem.zeroes(u32),
     count: u32 = std.mem.zeroes(u32),
@@ -1841,7 +1841,7 @@ pub extern fn multi_heap_get_info(heap: multi_heap_handle_t, info: [*c]multi_hea
 pub extern fn multi_heap_aligned_alloc_offs(heap: multi_heap_handle_t, size: usize, alignment: usize, offset: usize) ?*anyopaque;
 pub extern fn multi_heap_reset_minimum_free_bytes(heap: multi_heap_handle_t) usize;
 pub extern fn multi_heap_restore_minimum_free_bytes(heap: multi_heap_handle_t, new_minimum_free_bytes_value: usize) void;
-pub const esp_alloc_failed_hook_t = ?*const fn (usize, u32, [*:0]const u8) callconv(.C) void;
+pub const esp_alloc_failed_hook_t = ?*const fn (usize, u32, [*:0]const u8) callconv(.c) void;
 pub const Caps = enum(u32) {
     MALLOC_CAP_EXEC = (1 << 0), //< Memory must be able to run executable code
     MALLOC_CAP_32BIT = (1 << 1), //< Memory must allow for aligned 32-bit data accesses
@@ -2073,7 +2073,7 @@ pub extern fn vListInsertEnd(pxList: [*c]List_t, pxNewListItem: [*c]ListItem_t) 
 pub extern fn uxListRemove(pxItemToRemove: [*c]ListItem_t) UBaseType_t;
 pub const tskTaskControlBlock = opaque {};
 pub const TaskHandle_t = ?*tskTaskControlBlock;
-pub const TaskHookFunction_t = ?*const fn (?*anyopaque) callconv(.C) BaseType_t;
+pub const TaskHookFunction_t = ?*const fn (?*anyopaque) callconv(.c) BaseType_t;
 pub const eTaskState = enum(c_uint) {
     eRunning = 0,
     eReady = 1,
@@ -2222,7 +2222,7 @@ pub extern fn esp_task_wdt_delete(task_handle: TaskHandle_t) esp_err_t;
 pub extern fn esp_task_wdt_delete_user(user_handle: esp_task_wdt_user_handle_t) esp_err_t;
 pub extern fn esp_task_wdt_status(task_handle: TaskHandle_t) esp_err_t;
 pub extern fn esp_task_wdt_isr_user_handler() void;
-pub const task_wdt_msg_handler = ?*const fn (?*anyopaque, [*:0]const u8) callconv(.C) void;
+pub const task_wdt_msg_handler = ?*const fn (?*anyopaque, [*:0]const u8) callconv(.c) void;
 pub extern fn esp_task_wdt_print_triggered_tasks(msg_handler: task_wdt_msg_handler, @"opaque": ?*anyopaque, cpus_fail: [*c]c_int) esp_err_t;
 pub const esp_interface_t = enum(c_uint) {
     ESP_IF_WIFI_STA = 0,
@@ -2231,7 +2231,7 @@ pub const esp_interface_t = enum(c_uint) {
     ESP_IF_ETH = 3,
     ESP_IF_MAX = 4,
 };
-pub const esp_ipc_func_t = ?*const fn (?*anyopaque) callconv(.C) void;
+pub const esp_ipc_func_t = ?*const fn (?*anyopaque) callconv(.c) void;
 pub extern fn esp_ipc_call(cpu_id: u32, func: esp_ipc_func_t, arg: ?*anyopaque) esp_err_t;
 pub extern fn esp_ipc_call_blocking(cpu_id: u32, func: esp_ipc_func_t, arg: ?*anyopaque) esp_err_t;
 pub const esp_mac_type_t = enum(c_uint) {
@@ -2253,8 +2253,8 @@ pub extern fn esp_read_mac(mac: [*:0]u8, @"type": esp_mac_type_t) esp_err_t;
 pub extern fn esp_derive_local_mac(local_mac: [*:0]u8, universal_mac: [*:0]const u8) esp_err_t;
 pub extern fn esp_iface_mac_addr_set(mac: [*:0]const u8, @"type": esp_mac_type_t) esp_err_t;
 pub extern fn esp_mac_addr_len_get(@"type": esp_mac_type_t) usize;
-pub const esp_freertos_idle_cb_t = ?*const fn () callconv(.C) bool;
-pub const esp_freertos_tick_cb_t = ?*const fn () callconv(.C) void;
+pub const esp_freertos_idle_cb_t = ?*const fn () callconv(.c) bool;
+pub const esp_freertos_tick_cb_t = ?*const fn () callconv(.c) void;
 pub extern fn esp_register_freertos_idle_hook_for_cpu(new_idle_cb: esp_freertos_idle_cb_t, cpuid: UBaseType_t) esp_err_t;
 pub extern fn esp_register_freertos_idle_hook(new_idle_cb: esp_freertos_idle_cb_t) esp_err_t;
 pub extern fn esp_register_freertos_tick_hook_for_cpu(new_tick_cb: esp_freertos_tick_cb_t, cpuid: UBaseType_t) esp_err_t;
@@ -2263,7 +2263,7 @@ pub extern fn esp_deregister_freertos_idle_hook_for_cpu(old_idle_cb: esp_freerto
 pub extern fn esp_deregister_freertos_idle_hook(old_idle_cb: esp_freertos_idle_cb_t) void;
 pub extern fn esp_deregister_freertos_tick_hook_for_cpu(old_tick_cb: esp_freertos_tick_cb_t, cpuid: UBaseType_t) void;
 pub extern fn esp_deregister_freertos_tick_hook(old_tick_cb: esp_freertos_tick_cb_t) void;
-pub fn Atomic_CompareAndSwap_u32(pulDestination: [*c]volatile u32, ulExchange: u32, ulComparand: u32) callconv(.C) u32 {
+pub fn Atomic_CompareAndSwap_u32(pulDestination: [*c]volatile u32, ulExchange: u32, ulComparand: u32) callconv(.c) u32 {
     var ulReturnValue: u32 = 0;
     const uxCriticalSectionType: UBaseType_t = xPortSetInterruptMaskFromISR();
     {
@@ -2277,7 +2277,7 @@ pub fn Atomic_CompareAndSwap_u32(pulDestination: [*c]volatile u32, ulExchange: u
     vPortClearInterruptMaskFromISR(uxCriticalSectionType);
     return ulReturnValue;
 }
-pub fn Atomic_SwapPointers_p32(ppvDestination: [*c]volatile ?*anyopaque, pvExchange: ?*anyopaque) callconv(.C) ?*anyopaque {
+pub fn Atomic_SwapPointers_p32(ppvDestination: [*c]volatile ?*anyopaque, pvExchange: ?*anyopaque) callconv(.c) ?*anyopaque {
     var pReturnValue: ?*anyopaque = null;
     const uxCriticalSectionType: UBaseType_t = xPortSetInterruptMaskFromISR();
     {
@@ -2287,7 +2287,7 @@ pub fn Atomic_SwapPointers_p32(ppvDestination: [*c]volatile ?*anyopaque, pvExcha
     vPortClearInterruptMaskFromISR(uxCriticalSectionType);
     return pReturnValue;
 }
-pub fn Atomic_CompareAndSwapPointers_p32(ppvDestination: [*c]volatile ?*anyopaque, pvExchange: ?*anyopaque, pvComparand: ?*anyopaque) callconv(.C) u32 {
+pub fn Atomic_CompareAndSwapPointers_p32(ppvDestination: [*c]volatile ?*anyopaque, pvExchange: ?*anyopaque, pvComparand: ?*anyopaque) callconv(.c) u32 {
     var ulReturnValue: u32 = 0;
     const uxCriticalSectionType: UBaseType_t = xPortSetInterruptMaskFromISR();
     {
@@ -2299,7 +2299,7 @@ pub fn Atomic_CompareAndSwapPointers_p32(ppvDestination: [*c]volatile ?*anyopaqu
     vPortClearInterruptMaskFromISR(uxCriticalSectionType);
     return ulReturnValue;
 }
-pub fn Atomic_Add_u32(pulAddend: [*c]volatile u32, ulCount: u32) callconv(.C) u32 {
+pub fn Atomic_Add_u32(pulAddend: [*c]volatile u32, ulCount: u32) callconv(.c) u32 {
     var ulCurrent: u32 = 0;
     const uxCriticalSectionType: UBaseType_t = xPortSetInterruptMaskFromISR();
     {
@@ -2309,7 +2309,7 @@ pub fn Atomic_Add_u32(pulAddend: [*c]volatile u32, ulCount: u32) callconv(.C) u3
     vPortClearInterruptMaskFromISR(uxCriticalSectionType);
     return ulCurrent;
 }
-pub fn Atomic_Subtract_u32(pulAddend: [*c]volatile u32, ulCount: u32) callconv(.C) u32 {
+pub fn Atomic_Subtract_u32(pulAddend: [*c]volatile u32, ulCount: u32) callconv(.c) u32 {
     var ulCurrent: u32 = 0;
     const uxCriticalSectionType: UBaseType_t = xPortSetInterruptMaskFromISR();
     {
@@ -2319,7 +2319,7 @@ pub fn Atomic_Subtract_u32(pulAddend: [*c]volatile u32, ulCount: u32) callconv(.
     vPortClearInterruptMaskFromISR(uxCriticalSectionType);
     return ulCurrent;
 }
-pub fn Atomic_Increment_u32(pulAddend: [*c]volatile u32) callconv(.C) u32 {
+pub fn Atomic_Increment_u32(pulAddend: [*c]volatile u32) callconv(.c) u32 {
     var ulCurrent: u32 = 0;
     const uxCriticalSectionType: UBaseType_t = xPortSetInterruptMaskFromISR();
     {
@@ -2329,7 +2329,7 @@ pub fn Atomic_Increment_u32(pulAddend: [*c]volatile u32) callconv(.C) u32 {
     vPortClearInterruptMaskFromISR(uxCriticalSectionType);
     return ulCurrent;
 }
-pub fn Atomic_Decrement_u32(pulAddend: [*c]volatile u32) callconv(.C) u32 {
+pub fn Atomic_Decrement_u32(pulAddend: [*c]volatile u32) callconv(.c) u32 {
     var ulCurrent: u32 = 0;
     const uxCriticalSectionType: UBaseType_t = xPortSetInterruptMaskFromISR();
     {
@@ -2339,7 +2339,7 @@ pub fn Atomic_Decrement_u32(pulAddend: [*c]volatile u32) callconv(.C) u32 {
     vPortClearInterruptMaskFromISR(uxCriticalSectionType);
     return ulCurrent;
 }
-pub fn Atomic_OR_u32(pulDestination: [*c]volatile u32, ulValue: u32) callconv(.C) u32 {
+pub fn Atomic_OR_u32(pulDestination: [*c]volatile u32, ulValue: u32) callconv(.c) u32 {
     var ulCurrent: u32 = 0;
     const uxCriticalSectionType: UBaseType_t = xPortSetInterruptMaskFromISR();
     {
@@ -2349,7 +2349,7 @@ pub fn Atomic_OR_u32(pulDestination: [*c]volatile u32, ulValue: u32) callconv(.C
     vPortClearInterruptMaskFromISR(uxCriticalSectionType);
     return ulCurrent;
 }
-pub fn Atomic_AND_u32(pulDestination: [*c]volatile u32, ulValue: u32) callconv(.C) u32 {
+pub fn Atomic_AND_u32(pulDestination: [*c]volatile u32, ulValue: u32) callconv(.c) u32 {
     var ulCurrent: u32 = 0;
     const uxCriticalSectionType: UBaseType_t = xPortSetInterruptMaskFromISR();
     {
@@ -2359,7 +2359,7 @@ pub fn Atomic_AND_u32(pulDestination: [*c]volatile u32, ulValue: u32) callconv(.
     vPortClearInterruptMaskFromISR(uxCriticalSectionType);
     return ulCurrent;
 }
-pub fn Atomic_NAND_u32(pulDestination: [*c]volatile u32, ulValue: u32) callconv(.C) u32 {
+pub fn Atomic_NAND_u32(pulDestination: [*c]volatile u32, ulValue: u32) callconv(.c) u32 {
     var ulCurrent: u32 = 0;
     const uxCriticalSectionType: UBaseType_t = xPortSetInterruptMaskFromISR();
     {
@@ -2369,7 +2369,7 @@ pub fn Atomic_NAND_u32(pulDestination: [*c]volatile u32, ulValue: u32) callconv(
     vPortClearInterruptMaskFromISR(uxCriticalSectionType);
     return ulCurrent;
 }
-pub fn Atomic_XOR_u32(pulDestination: [*c]volatile u32, ulValue: u32) callconv(.C) u32 {
+pub fn Atomic_XOR_u32(pulDestination: [*c]volatile u32, ulValue: u32) callconv(.c) u32 {
     var ulCurrent: u32 = 0;
     const uxCriticalSectionType: UBaseType_t = xPortSetInterruptMaskFromISR();
     {
@@ -2381,8 +2381,8 @@ pub fn Atomic_XOR_u32(pulDestination: [*c]volatile u32, ulValue: u32) callconv(.
 }
 pub const tmrTimerControl = opaque {};
 pub const TimerHandle_t = ?*tmrTimerControl;
-pub const TimerCallbackFunction_t = ?*const fn (TimerHandle_t) callconv(.C) void;
-pub const PendedFunction_t = ?*const fn (?*anyopaque, u32) callconv(.C) void;
+pub const TimerCallbackFunction_t = ?*const fn (TimerHandle_t) callconv(.c) void;
+pub const PendedFunction_t = ?*const fn (?*anyopaque, u32) callconv(.c) void;
 pub extern fn xTimerCreate(pcTimerName: [*:0]const u8, xTimerPeriodInTicks: TickType_t, uxAutoReload: UBaseType_t, pvTimerID: ?*anyopaque, pxCallbackFunction: TimerCallbackFunction_t) TimerHandle_t;
 pub extern fn xTimerCreateStatic(pcTimerName: [*:0]const u8, xTimerPeriodInTicks: TickType_t, uxAutoReload: UBaseType_t, pvTimerID: ?*anyopaque, pxCallbackFunction: TimerCallbackFunction_t, pxTimerBuffer: [*c]StaticTimer_t) TimerHandle_t;
 pub extern fn pvTimerGetTimerID(xTimer: TimerHandle_t) ?*anyopaque;
@@ -2536,7 +2536,7 @@ pub extern fn vRingbufferDelete(xRingbuffer: RingbufHandle_t) void;
 pub extern fn xRingbufferGetMaxItemSize(xRingbuffer: RingbufHandle_t) usize;
 pub extern fn xRingbufferGetCurFreeSize(xRingbuffer: RingbufHandle_t) usize;
 pub extern fn xRingbufferAddToQueueSetRead(xRingbuffer: RingbufHandle_t, xQueueSet: QueueSetHandle_t) BaseType_t;
-pub fn xRingbufferCanRead(xRingbuffer: RingbufHandle_t, xMember: QueueSetMemberHandle_t) callconv(.C) BaseType_t {
+pub fn xRingbufferCanRead(xRingbuffer: RingbufHandle_t, xMember: QueueSetMemberHandle_t) callconv(.c) BaseType_t {
     return if (xMember == @as(QueueSetMemberHandle_t, @ptrCast(xRingbuffer))) @as(BaseType_t, @bitCast(@as(c_int, 1))) else @as(BaseType_t, @bitCast(@as(c_int, 0)));
 }
 pub extern fn xRingbufferRemoveFromQueueSetRead(xRingbuffer: RingbufHandle_t, xQueueSet: QueueSetHandle_t) BaseType_t;
@@ -2548,7 +2548,7 @@ pub extern fn vRingbufferDeleteWithCaps(xRingbuffer: RingbufHandle_t) void;
 
 pub const esp_event_base_t = [*:0]const u8;
 pub const esp_event_loop_handle_t = ?*anyopaque;
-pub const esp_event_handler_t = ?*const fn (?*anyopaque, esp_event_base_t, i32, ?*anyopaque) callconv(.C) void;
+pub const esp_event_handler_t = ?*const fn (?*anyopaque, esp_event_base_t, i32, ?*anyopaque) callconv(.c) void;
 pub const esp_event_handler_instance_t = ?*anyopaque;
 pub const esp_event_loop_args_t = extern struct {
     queue_size: i32 = std.mem.zeroes(i32),
@@ -2723,8 +2723,8 @@ pub const nvs_sec_cfg_t = extern struct {
     eky: [32]u8 = std.mem.zeroes([32]u8),
     tky: [32]u8 = std.mem.zeroes([32]u8),
 };
-pub const nvs_flash_generate_keys_t = ?*const fn (?*const anyopaque, [*c]nvs_sec_cfg_t) callconv(.C) esp_err_t;
-pub const nvs_flash_read_cfg_t = ?*const fn (?*const anyopaque, [*c]nvs_sec_cfg_t) callconv(.C) esp_err_t;
+pub const nvs_flash_generate_keys_t = ?*const fn (?*const anyopaque, [*c]nvs_sec_cfg_t) callconv(.c) esp_err_t;
+pub const nvs_flash_read_cfg_t = ?*const fn (?*const anyopaque, [*c]nvs_sec_cfg_t) callconv(.c) esp_err_t;
 pub const nvs_sec_scheme_t = extern struct {
     scheme_id: c_int = std.mem.zeroes(c_int),
     scheme_data: ?*anyopaque = null,
@@ -2782,18 +2782,18 @@ const unnamed_16 = enum(c_uint) {
     ESP_BT_COEX_PHY_CODED_TX_RX_TIME_LIMIT_FORCE_DISABLE = 0,
     ESP_BT_COEX_PHY_CODED_TX_RX_TIME_LIMIT_FORCE_ENABLE = 1,
 };
-pub const esp_bt_hci_tl_callback_t = ?*const fn (?*anyopaque, u8) callconv(.C) void;
+pub const esp_bt_hci_tl_callback_t = ?*const fn (?*anyopaque, u8) callconv(.c) void;
 pub const esp_bt_hci_tl_t = extern struct {
     _magic: u32 = std.mem.zeroes(u32),
     _version: u32 = std.mem.zeroes(u32),
     _reserved: u32 = std.mem.zeroes(u32),
-    _open: ?*const fn () callconv(.C) c_int = std.mem.zeroes(?*const fn () callconv(.C) c_int),
-    _close: ?*const fn () callconv(.C) void = std.mem.zeroes(?*const fn () callconv(.C) void),
-    _finish_transfers: ?*const fn () callconv(.C) void = std.mem.zeroes(?*const fn () callconv(.C) void),
-    _recv: ?*const fn ([*:0]u8, u32, esp_bt_hci_tl_callback_t, ?*anyopaque) callconv(.C) void = std.mem.zeroes(?*const fn ([*:0]u8, u32, esp_bt_hci_tl_callback_t, ?*anyopaque) callconv(.C) void),
-    _send: ?*const fn ([*:0]u8, u32, esp_bt_hci_tl_callback_t, ?*anyopaque) callconv(.C) void = std.mem.zeroes(?*const fn ([*:0]u8, u32, esp_bt_hci_tl_callback_t, ?*anyopaque) callconv(.C) void),
-    _flow_off: ?*const fn () callconv(.C) bool = std.mem.zeroes(?*const fn () callconv(.C) bool),
-    _flow_on: ?*const fn () callconv(.C) void = std.mem.zeroes(?*const fn () callconv(.C) void),
+    _open: ?*const fn () callconv(.c) c_int = std.mem.zeroes(?*const fn () callconv(.c) c_int),
+    _close: ?*const fn () callconv(.c) void = std.mem.zeroes(?*const fn () callconv(.c) void),
+    _finish_transfers: ?*const fn () callconv(.c) void = std.mem.zeroes(?*const fn () callconv(.c) void),
+    _recv: ?*const fn ([*:0]u8, u32, esp_bt_hci_tl_callback_t, ?*anyopaque) callconv(.c) void = std.mem.zeroes(?*const fn ([*:0]u8, u32, esp_bt_hci_tl_callback_t, ?*anyopaque) callconv(.c) void),
+    _send: ?*const fn ([*:0]u8, u32, esp_bt_hci_tl_callback_t, ?*anyopaque) callconv(.c) void = std.mem.zeroes(?*const fn ([*:0]u8, u32, esp_bt_hci_tl_callback_t, ?*anyopaque) callconv(.c) void),
+    _flow_off: ?*const fn () callconv(.c) bool = std.mem.zeroes(?*const fn () callconv(.c) bool),
+    _flow_on: ?*const fn () callconv(.c) void = std.mem.zeroes(?*const fn () callconv(.c) void),
 };
 pub const esp_bt_controller_config_t = extern struct {
     magic: u32 = std.mem.zeroes(u32),
@@ -2881,8 +2881,8 @@ pub extern fn esp_bt_controller_disable() esp_err_t;
 pub extern fn esp_bt_controller_get_status() esp_bt_controller_status_t;
 pub extern fn esp_bt_get_tx_buf_num() u16;
 pub const esp_vhci_host_callback = extern struct {
-    notify_host_send_available: ?*const fn () callconv(.C) void = std.mem.zeroes(?*const fn () callconv(.C) void),
-    notify_host_recv: ?*const fn ([*:0]u8, u16) callconv(.C) c_int = std.mem.zeroes(?*const fn ([*:0]u8, u16) callconv(.C) c_int),
+    notify_host_send_available: ?*const fn () callconv(.c) void = std.mem.zeroes(?*const fn () callconv(.c) void),
+    notify_host_recv: ?*const fn ([*:0]u8, u16) callconv(.c) c_int = std.mem.zeroes(?*const fn ([*:0]u8, u16) callconv(.c) c_int),
 };
 pub const esp_vhci_host_callback_t = esp_vhci_host_callback;
 pub extern fn esp_vhci_host_check_send_available() bool;
@@ -3044,7 +3044,7 @@ pub const name_res_param_18 = extern struct {
 pub const esp_bt_dev_cb_param_t = extern union {
     name_res: name_res_param_18,
 };
-pub const esp_bt_dev_cb_t = ?*const fn (esp_bt_dev_cb_event_t, [*c]esp_bt_dev_cb_param_t) callconv(.C) void;
+pub const esp_bt_dev_cb_t = ?*const fn (esp_bt_dev_cb_event_t, [*c]esp_bt_dev_cb_param_t) callconv(.c) void;
 pub extern fn esp_bt_dev_register_callback(callback: esp_bt_dev_cb_t) esp_err_t;
 pub extern fn esp_bt_dev_get_address() [*:0]const u8;
 pub extern fn esp_bt_dev_set_device_name(name: [*:0]const u8) esp_err_t;
@@ -3336,7 +3336,7 @@ pub const wifi_ant_mode_t = enum(c_uint) {
 };
 // esp-idf/components/esp_wifi/include/esp_wifi_types_generic.h:521:21: warning: struct demoted to opaque type - has bitfield
 pub const wifi_ant_config_t = opaque {};
-pub const wifi_action_rx_cb_t = ?*const fn ([*:0]u8, [*:0]u8, usize, u8) callconv(.C) c_int;
+pub const wifi_action_rx_cb_t = ?*const fn ([*:0]u8, [*:0]u8, usize, u8) callconv(.c) c_int;
 pub const wifi_action_tx_req_t = extern struct {
     ifx: wifi_interface_t align(4) = std.mem.zeroes(wifi_interface_t),
     dest_mac: [6]u8 = std.mem.zeroes([6]u8),
@@ -3832,11 +3832,11 @@ pub const esp_blufi_cb_param_t = extern union {
     report_error: blufi_get_error_evt_param_39,
     custom_data: blufi_recv_custom_data_evt_param_40,
 };
-pub const esp_blufi_event_cb_t = ?*const fn (esp_blufi_cb_event_t, [*c]esp_blufi_cb_param_t) callconv(.C) void;
-pub const esp_blufi_negotiate_data_handler_t = ?*const fn ([*:0]u8, c_int, [*c][*c]u8, [*c]c_int, [*c]bool) callconv(.C) void;
-pub const esp_blufi_encrypt_func_t = ?*const fn (u8, [*:0]u8, c_int) callconv(.C) c_int;
-pub const esp_blufi_decrypt_func_t = ?*const fn (u8, [*:0]u8, c_int) callconv(.C) c_int;
-pub const esp_blufi_checksum_func_t = ?*const fn (u8, [*:0]u8, c_int) callconv(.C) u16;
+pub const esp_blufi_event_cb_t = ?*const fn (esp_blufi_cb_event_t, [*c]esp_blufi_cb_param_t) callconv(.c) void;
+pub const esp_blufi_negotiate_data_handler_t = ?*const fn ([*:0]u8, c_int, [*c][*c]u8, [*c]c_int, [*c]bool) callconv(.c) void;
+pub const esp_blufi_encrypt_func_t = ?*const fn (u8, [*:0]u8, c_int) callconv(.c) c_int;
+pub const esp_blufi_decrypt_func_t = ?*const fn (u8, [*:0]u8, c_int) callconv(.c) c_int;
+pub const esp_blufi_checksum_func_t = ?*const fn (u8, [*:0]u8, c_int) callconv(.c) u16;
 pub const esp_blufi_callbacks_t = extern struct {
     event_cb: esp_blufi_event_cb_t = std.mem.zeroes(esp_blufi_event_cb_t),
     negotiate_data_handler: esp_blufi_negotiate_data_handler_t = std.mem.zeroes(esp_blufi_negotiate_data_handler_t),
@@ -4653,7 +4653,7 @@ pub const esp_ble_gap_cb_param_t = extern union {
     past_received: ble_periodic_adv_sync_trans_recv_param_101,
     dtm_state_update: ble_dtm_state_update_evt_param_102,
 };
-pub const esp_gap_ble_cb_t = ?*const fn (esp_gap_ble_cb_event_t, [*c]esp_ble_gap_cb_param_t) callconv(.C) void;
+pub const esp_gap_ble_cb_t = ?*const fn (esp_gap_ble_cb_event_t, [*c]esp_ble_gap_cb_param_t) callconv(.c) void;
 pub extern fn esp_ble_gap_register_callback(callback: esp_gap_ble_cb_t) esp_err_t;
 pub extern fn esp_ble_gap_get_callback() esp_gap_ble_cb_t;
 pub extern fn esp_ble_gap_config_adv_data(adv_data: [*c]esp_ble_adv_data_t) esp_err_t;
@@ -4846,7 +4846,7 @@ pub const intr_type = enum(c_uint) {
 };
 pub const esp_timer = opaque {};
 pub const esp_timer_handle_t = ?*esp_timer;
-pub const esp_timer_cb_t = ?*const fn (?*anyopaque) callconv(.C) void;
+pub const esp_timer_cb_t = ?*const fn (?*anyopaque) callconv(.c) void;
 pub const esp_timer_dispatch_t = enum(c_uint) {
     ESP_TIMER_TASK = 0,
     ESP_TIMER_MAX = 1,
@@ -4880,20 +4880,20 @@ pub const esp_apptrace_tmo_t = extern struct {
     tmo: i64 = std.mem.zeroes(i64),
     elapsed: i64 = std.mem.zeroes(i64),
 };
-pub fn esp_apptrace_tmo_init(tmo: [*c]esp_apptrace_tmo_t, user_tmo: u32) callconv(.C) void {
+pub fn esp_apptrace_tmo_init(tmo: [*c]esp_apptrace_tmo_t, user_tmo: u32) callconv(.c) void {
     tmo.*.start = esp_timer_get_time();
     tmo.*.tmo = if (user_tmo == @as(u32, @bitCast(-@as(c_int, 1)))) @as(i64, @bitCast(@as(c_longlong, -@as(c_int, 1)))) else @as(i64, @bitCast(@as(c_ulonglong, user_tmo)));
     tmo.*.elapsed = 0;
 }
 pub extern fn esp_apptrace_tmo_check(tmo: [*c]esp_apptrace_tmo_t) esp_err_t;
-pub fn esp_apptrace_tmo_remaining_us(tmo: [*c]esp_apptrace_tmo_t) callconv(.C) u32 {
+pub fn esp_apptrace_tmo_remaining_us(tmo: [*c]esp_apptrace_tmo_t) callconv(.c) u32 {
     return @as(u32, @bitCast(@as(c_int, @truncate(if (tmo.*.tmo != @as(i64, @bitCast(@as(c_longlong, -@as(c_int, 1))))) tmo.*.elapsed - tmo.*.tmo else @as(i64, @bitCast(@as(c_ulonglong, @as(u32, @bitCast(-@as(c_int, 1))))))))));
 }
 pub const esp_apptrace_lock_t = extern struct {
     mux: spinlock_t = std.mem.zeroes(spinlock_t),
     int_state: c_uint = std.mem.zeroes(c_uint),
 };
-pub fn esp_apptrace_lock_init(lock: [*c]esp_apptrace_lock_t) callconv(.C) void {
+pub fn esp_apptrace_lock_init(lock: [*c]esp_apptrace_lock_t) callconv(.c) void {
     spinlock_initialize(&lock.*.mux);
     lock.*.int_state = 0;
 }
@@ -4906,7 +4906,7 @@ pub const esp_apptrace_rb_t = extern struct {
     rd: u32 = std.mem.zeroes(u32),
     wr: u32 = std.mem.zeroes(u32),
 };
-pub fn esp_apptrace_rb_init(rb: [*c]esp_apptrace_rb_t, data: [*:0]u8, size: u32) callconv(.C) void {
+pub fn esp_apptrace_rb_init(rb: [*c]esp_apptrace_rb_t, data: [*:0]u8, size: u32) callconv(.c) void {
     rb.*.data = data;
     rb.*.size = blk: {
         const tmp = size;
@@ -4922,7 +4922,7 @@ pub extern fn esp_apptrace_rb_read_size_get(rb: [*c]esp_apptrace_rb_t) u32;
 pub extern fn esp_apptrace_rb_write_size_get(rb: [*c]esp_apptrace_rb_t) u32;
 pub extern fn esp_apptrace_log_lock() c_int;
 pub extern fn esp_apptrace_log_unlock() void;
-pub fn esp_sysview_flush(tmo: u32) callconv(.C) esp_err_t {
+pub fn esp_sysview_flush(tmo: u32) callconv(.c) esp_err_t {
     SEGGER_RTT_ESP_Flush(@as(c_ulong, @bitCast(@as(c_long, @as(c_int, 0)))), @as(c_ulong, @bitCast(@as(c_ulong, tmo))));
     return 0;
 }
@@ -4952,33 +4952,33 @@ pub const crypto_hash = opaque {};
 pub const esp_crypto_hash_t = crypto_hash;
 pub const crypto_cipher = opaque {};
 pub const esp_crypto_cipher_t = crypto_cipher;
-pub const esp_aes_128_encrypt_t = ?*const fn ([*:0]const u8, [*:0]const u8, [*:0]u8, c_int) callconv(.C) c_int;
-pub const esp_aes_128_decrypt_t = ?*const fn ([*:0]const u8, [*:0]const u8, [*:0]u8, c_int) callconv(.C) c_int;
-pub const esp_aes_wrap_t = ?*const fn ([*:0]const u8, c_int, [*:0]const u8, [*:0]u8) callconv(.C) c_int;
-pub const esp_aes_unwrap_t = ?*const fn ([*:0]const u8, c_int, [*:0]const u8, [*:0]u8) callconv(.C) c_int;
-pub const esp_hmac_sha256_vector_t = ?*const fn ([*:0]const u8, c_int, c_int, [*c][*c]const u8, [*c]const c_int, [*:0]u8) callconv(.C) c_int;
-pub const esp_sha256_prf_t = ?*const fn ([*:0]const u8, c_int, [*:0]const u8, [*:0]const u8, c_int, [*:0]u8, c_int) callconv(.C) c_int;
-pub const esp_hmac_md5_t = ?*const fn ([*:0]const u8, c_uint, [*:0]const u8, c_uint, [*:0]u8) callconv(.C) c_int;
-pub const esp_hmac_md5_vector_t = ?*const fn ([*:0]const u8, c_uint, c_uint, [*c][*c]const u8, [*c]const c_uint, [*:0]u8) callconv(.C) c_int;
-pub const esp_hmac_sha1_t = ?*const fn ([*:0]const u8, c_uint, [*:0]const u8, c_uint, [*:0]u8) callconv(.C) c_int;
-pub const esp_hmac_sha1_vector_t = ?*const fn ([*:0]const u8, c_uint, c_uint, [*c][*c]const u8, [*c]const c_uint, [*:0]u8) callconv(.C) c_int;
-pub const esp_sha1_prf_t = ?*const fn ([*:0]const u8, c_uint, [*:0]const u8, [*:0]const u8, c_uint, [*:0]u8, c_uint) callconv(.C) c_int;
-pub const esp_sha1_vector_t = ?*const fn (c_uint, [*c][*c]const u8, [*c]const c_uint, [*:0]u8) callconv(.C) c_int;
-pub const esp_pbkdf2_sha1_t = ?*const fn ([*:0]const u8, [*:0]const u8, c_uint, c_int, [*:0]u8, c_uint) callconv(.C) c_int;
-pub const esp_rc4_skip_t = ?*const fn ([*:0]const u8, c_uint, c_uint, [*:0]u8, c_uint) callconv(.C) c_int;
-pub const esp_md5_vector_t = ?*const fn (c_uint, [*c][*c]const u8, [*c]const c_uint, [*:0]u8) callconv(.C) c_int;
-pub const esp_aes_encrypt_t = ?*const fn (?*anyopaque, [*:0]const u8, [*:0]u8) callconv(.C) void;
-pub const esp_aes_encrypt_init_t = ?*const fn ([*:0]const u8, c_uint) callconv(.C) ?*anyopaque;
-pub const esp_aes_encrypt_deinit_t = ?*const fn (?*anyopaque) callconv(.C) void;
-pub const esp_aes_decrypt_t = ?*const fn (?*anyopaque, [*:0]const u8, [*:0]u8) callconv(.C) void;
-pub const esp_aes_decrypt_init_t = ?*const fn ([*:0]const u8, c_uint) callconv(.C) ?*anyopaque;
-pub const esp_aes_decrypt_deinit_t = ?*const fn (?*anyopaque) callconv(.C) void;
-pub const esp_omac1_aes_128_t = ?*const fn ([*:0]const u8, [*:0]const u8, usize, [*:0]u8) callconv(.C) c_int;
-pub const esp_ccmp_decrypt_t = ?*const fn ([*:0]const u8, [*:0]const u8, [*:0]const u8, usize, [*c]usize, bool) callconv(.C) [*:0]u8;
-pub const esp_ccmp_encrypt_t = ?*const fn ([*:0]const u8, [*:0]u8, usize, usize, [*:0]u8, c_int, [*c]usize) callconv(.C) [*:0]u8;
-pub const esp_aes_gmac_t = ?*const fn ([*:0]const u8, usize, [*:0]const u8, usize, [*:0]const u8, usize, [*:0]u8) callconv(.C) c_int;
-pub const esp_sha256_vector_t = ?*const fn (usize, [*c][*c]const u8, [*c]const usize, [*:0]u8) callconv(.C) c_int;
-pub const esp_crc32_le_t = ?*const fn (u32, [*:0]const u8, u32) callconv(.C) u32;
+pub const esp_aes_128_encrypt_t = ?*const fn ([*:0]const u8, [*:0]const u8, [*:0]u8, c_int) callconv(.c) c_int;
+pub const esp_aes_128_decrypt_t = ?*const fn ([*:0]const u8, [*:0]const u8, [*:0]u8, c_int) callconv(.c) c_int;
+pub const esp_aes_wrap_t = ?*const fn ([*:0]const u8, c_int, [*:0]const u8, [*:0]u8) callconv(.c) c_int;
+pub const esp_aes_unwrap_t = ?*const fn ([*:0]const u8, c_int, [*:0]const u8, [*:0]u8) callconv(.c) c_int;
+pub const esp_hmac_sha256_vector_t = ?*const fn ([*:0]const u8, c_int, c_int, [*c][*c]const u8, [*c]const c_int, [*:0]u8) callconv(.c) c_int;
+pub const esp_sha256_prf_t = ?*const fn ([*:0]const u8, c_int, [*:0]const u8, [*:0]const u8, c_int, [*:0]u8, c_int) callconv(.c) c_int;
+pub const esp_hmac_md5_t = ?*const fn ([*:0]const u8, c_uint, [*:0]const u8, c_uint, [*:0]u8) callconv(.c) c_int;
+pub const esp_hmac_md5_vector_t = ?*const fn ([*:0]const u8, c_uint, c_uint, [*c][*c]const u8, [*c]const c_uint, [*:0]u8) callconv(.c) c_int;
+pub const esp_hmac_sha1_t = ?*const fn ([*:0]const u8, c_uint, [*:0]const u8, c_uint, [*:0]u8) callconv(.c) c_int;
+pub const esp_hmac_sha1_vector_t = ?*const fn ([*:0]const u8, c_uint, c_uint, [*c][*c]const u8, [*c]const c_uint, [*:0]u8) callconv(.c) c_int;
+pub const esp_sha1_prf_t = ?*const fn ([*:0]const u8, c_uint, [*:0]const u8, [*:0]const u8, c_uint, [*:0]u8, c_uint) callconv(.c) c_int;
+pub const esp_sha1_vector_t = ?*const fn (c_uint, [*c][*c]const u8, [*c]const c_uint, [*:0]u8) callconv(.c) c_int;
+pub const esp_pbkdf2_sha1_t = ?*const fn ([*:0]const u8, [*:0]const u8, c_uint, c_int, [*:0]u8, c_uint) callconv(.c) c_int;
+pub const esp_rc4_skip_t = ?*const fn ([*:0]const u8, c_uint, c_uint, [*:0]u8, c_uint) callconv(.c) c_int;
+pub const esp_md5_vector_t = ?*const fn (c_uint, [*c][*c]const u8, [*c]const c_uint, [*:0]u8) callconv(.c) c_int;
+pub const esp_aes_encrypt_t = ?*const fn (?*anyopaque, [*:0]const u8, [*:0]u8) callconv(.c) void;
+pub const esp_aes_encrypt_init_t = ?*const fn ([*:0]const u8, c_uint) callconv(.c) ?*anyopaque;
+pub const esp_aes_encrypt_deinit_t = ?*const fn (?*anyopaque) callconv(.c) void;
+pub const esp_aes_decrypt_t = ?*const fn (?*anyopaque, [*:0]const u8, [*:0]u8) callconv(.c) void;
+pub const esp_aes_decrypt_init_t = ?*const fn ([*:0]const u8, c_uint) callconv(.c) ?*anyopaque;
+pub const esp_aes_decrypt_deinit_t = ?*const fn (?*anyopaque) callconv(.c) void;
+pub const esp_omac1_aes_128_t = ?*const fn ([*:0]const u8, [*:0]const u8, usize, [*:0]u8) callconv(.c) c_int;
+pub const esp_ccmp_decrypt_t = ?*const fn ([*:0]const u8, [*:0]const u8, [*:0]const u8, usize, [*c]usize, bool) callconv(.c) [*:0]u8;
+pub const esp_ccmp_encrypt_t = ?*const fn ([*:0]const u8, [*:0]u8, usize, usize, [*:0]u8, c_int, [*c]usize) callconv(.c) [*:0]u8;
+pub const esp_aes_gmac_t = ?*const fn ([*:0]const u8, usize, [*:0]const u8, usize, [*:0]const u8, usize, [*:0]u8) callconv(.c) c_int;
+pub const esp_sha256_vector_t = ?*const fn (usize, [*c][*c]const u8, [*c]const usize, [*:0]u8) callconv(.c) c_int;
+pub const esp_crc32_le_t = ?*const fn (u32, [*:0]const u8, u32) callconv(.c) u32;
 pub const wpa_crypto_funcs_t = extern struct {
     size: u32 = std.mem.zeroes(u32),
     version: u32 = std.mem.zeroes(u32),
@@ -5041,7 +5041,7 @@ pub const esp_ip6_addr_type_t = enum(c_uint) {
     ESP_IP6_ADDR_IS_IPV4_MAPPED_IPV6 = 5,
 };
 pub extern fn esp_netif_ip6_get_addr_type(ip6_addr: [*c]esp_ip6_addr_t) esp_ip6_addr_type_t;
-pub fn esp_netif_ip_addr_copy(dest: [*c]esp_ip_addr_t, src: [*c]const esp_ip_addr_t) callconv(.C) void {
+pub fn esp_netif_ip_addr_copy(dest: [*c]esp_ip_addr_t, src: [*c]const esp_ip_addr_t) callconv(.c) void {
     dest.*.type = src.*.type;
     if (@as(c_uint, @bitCast(@as(c_uint, src.*.type))) == @as(c_uint, 6)) {
         dest.*.u_addr.ip6.addr[@as(c_uint, @intCast(@as(c_int, 0)))] = src.*.u_addr.ip6.addr[@as(c_uint, @intCast(@as(c_int, 0)))];
@@ -5165,9 +5165,9 @@ pub const esp_netif_inherent_config_t = esp_netif_inherent_config;
 pub const esp_netif_iodriver_handle = ?*anyopaque;
 pub const esp_netif_driver_ifconfig = extern struct {
     handle: esp_netif_iodriver_handle = std.mem.zeroes(esp_netif_iodriver_handle),
-    transmit: ?*const fn (?*anyopaque, ?*anyopaque, usize) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn (?*anyopaque, ?*anyopaque, usize) callconv(.C) esp_err_t),
-    transmit_wrap: ?*const fn (?*anyopaque, ?*anyopaque, usize, ?*anyopaque) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn (?*anyopaque, ?*anyopaque, usize, ?*anyopaque) callconv(.C) esp_err_t),
-    driver_free_rx_buffer: ?*const fn (?*anyopaque, ?*anyopaque) callconv(.C) void = std.mem.zeroes(?*const fn (?*anyopaque, ?*anyopaque) callconv(.C) void),
+    transmit: ?*const fn (?*anyopaque, ?*anyopaque, usize) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn (?*anyopaque, ?*anyopaque, usize) callconv(.c) esp_err_t),
+    transmit_wrap: ?*const fn (?*anyopaque, ?*anyopaque, usize, ?*anyopaque) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn (?*anyopaque, ?*anyopaque, usize, ?*anyopaque) callconv(.c) esp_err_t),
+    driver_free_rx_buffer: ?*const fn (?*anyopaque, ?*anyopaque) callconv(.c) void = std.mem.zeroes(?*const fn (?*anyopaque, ?*anyopaque) callconv(.c) void),
 };
 pub const esp_netif_driver_ifconfig_t = esp_netif_driver_ifconfig;
 pub const esp_netif_netstack_config = opaque {};
@@ -5179,7 +5179,7 @@ pub const esp_netif_config = extern struct {
 };
 pub const esp_netif_config_t = esp_netif_config;
 pub const esp_netif_driver_base_s = extern struct {
-    post_attach: ?*const fn (?*esp_netif_t, esp_netif_iodriver_handle) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn (?*esp_netif_t, esp_netif_iodriver_handle) callconv(.C) esp_err_t),
+    post_attach: ?*const fn (?*esp_netif_t, esp_netif_iodriver_handle) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn (?*esp_netif_t, esp_netif_iodriver_handle) callconv(.c) esp_err_t),
     netif: ?*esp_netif_t = std.mem.zeroes(?*esp_netif_t),
 };
 pub const esp_netif_driver_base_t = esp_netif_driver_base_s;
@@ -5187,7 +5187,7 @@ pub const esp_netif_pair_mac_ip_t = extern struct {
     mac: [6]u8 = std.mem.zeroes([6]u8),
     ip: esp_ip4_addr_t = std.mem.zeroes(esp_ip4_addr_t),
 };
-pub const esp_netif_receive_t = ?*const fn (?*esp_netif_t, ?*anyopaque, usize, ?*anyopaque) callconv(.C) esp_err_t;
+pub const esp_netif_receive_t = ?*const fn (?*esp_netif_t, ?*anyopaque, usize, ?*anyopaque) callconv(.c) esp_err_t;
 pub extern var _g_esp_netif_netstack_default_eth: ?*const esp_netif_netstack_config_t;
 pub extern var _g_esp_netif_netstack_default_br: ?*const esp_netif_netstack_config_t;
 pub extern var _g_esp_netif_netstack_default_wifi_sta: ?*const esp_netif_netstack_config_t;
@@ -5260,12 +5260,12 @@ pub extern fn esp_netif_get_route_prio(esp_netif: ?*esp_netif_t) c_int;
 pub extern fn esp_netif_get_event_id(esp_netif: ?*esp_netif_t, event_type: esp_netif_ip_event_type_t) i32;
 pub extern fn esp_netif_next(esp_netif: ?*esp_netif_t) ?*esp_netif_t;
 pub extern fn esp_netif_next_unsafe(esp_netif: ?*esp_netif_t) ?*esp_netif_t;
-pub const esp_netif_find_predicate_t = ?*const fn (?*esp_netif_t, ?*anyopaque) callconv(.C) bool;
+pub const esp_netif_find_predicate_t = ?*const fn (?*esp_netif_t, ?*anyopaque) callconv(.c) bool;
 pub extern fn esp_netif_find_if(@"fn": esp_netif_find_predicate_t, ctx: ?*anyopaque) ?*esp_netif_t;
 pub extern fn esp_netif_get_nr_of_ifs() usize;
 pub extern fn esp_netif_netstack_buf_ref(netstack_buf: ?*anyopaque) void;
 pub extern fn esp_netif_netstack_buf_free(netstack_buf: ?*anyopaque) void;
-pub const esp_netif_callback_fn = ?*const fn (?*anyopaque) callconv(.C) esp_err_t;
+pub const esp_netif_callback_fn = ?*const fn (?*anyopaque) callconv(.c) esp_err_t;
 pub extern fn esp_netif_tcpip_exec(@"fn": esp_netif_callback_fn, ctx: ?*anyopaque) esp_err_t;
 pub extern fn esp_netif_attach_wifi_station(esp_netif: ?*esp_netif_t) esp_err_t;
 pub extern fn esp_netif_attach_wifi_ap(esp_netif: ?*esp_netif_t) esp_err_t;
@@ -5338,7 +5338,7 @@ pub extern fn esp_wifi_set_country(country: [*c]const wifi_country_t) esp_err_t;
 pub extern fn esp_wifi_get_country(country: [*c]wifi_country_t) esp_err_t;
 pub extern fn esp_wifi_set_mac(ifx: wifi_interface_t, mac: [*:0]const u8) esp_err_t;
 pub extern fn esp_wifi_get_mac(ifx: wifi_interface_t, mac: [*:0]u8) esp_err_t;
-pub const wifi_promiscuous_cb_t = ?*const fn (?*anyopaque, wifi_promiscuous_pkt_type_t) callconv(.C) void;
+pub const wifi_promiscuous_cb_t = ?*const fn (?*anyopaque, wifi_promiscuous_pkt_type_t) callconv(.c) void;
 pub extern fn esp_wifi_set_promiscuous_rx_cb(cb: wifi_promiscuous_cb_t) esp_err_t;
 pub extern fn esp_wifi_set_promiscuous(en: bool) esp_err_t;
 pub extern fn esp_wifi_get_promiscuous(en: [*c]bool) esp_err_t;
@@ -5351,7 +5351,7 @@ pub extern fn esp_wifi_get_config(interface: wifi_interface_t, conf: ?*wifi_conf
 pub extern fn esp_wifi_ap_get_sta_list(sta: ?*wifi_sta_list_t) esp_err_t;
 pub extern fn esp_wifi_ap_get_sta_aid(mac: [*:0]const u8, aid: [*c]u16) esp_err_t;
 pub extern fn esp_wifi_set_storage(storage: wifi_storage_t) esp_err_t;
-pub const esp_vendor_ie_cb_t = ?*const fn (?*anyopaque, wifi_vendor_ie_type_t, [*:0]const u8, [*c]const vendor_ie_data_t, c_int) callconv(.C) void;
+pub const esp_vendor_ie_cb_t = ?*const fn (?*anyopaque, wifi_vendor_ie_type_t, [*:0]const u8, [*c]const vendor_ie_data_t, c_int) callconv(.c) void;
 pub extern fn esp_wifi_set_vendor_ie(enable: bool, @"type": wifi_vendor_ie_type_t, idx: wifi_vendor_ie_id_t, vnd_ie: ?*const anyopaque) esp_err_t;
 pub extern fn esp_wifi_set_vendor_ie_cb(cb: esp_vendor_ie_cb_t, ctx: ?*anyopaque) esp_err_t;
 pub extern fn esp_wifi_set_max_tx_power(power: i8) esp_err_t;
@@ -5359,7 +5359,7 @@ pub extern fn esp_wifi_get_max_tx_power(power: [*:0]i8) esp_err_t;
 pub extern fn esp_wifi_set_event_mask(mask: u32) esp_err_t;
 pub extern fn esp_wifi_get_event_mask(mask: [*c]u32) esp_err_t;
 pub extern fn esp_wifi_80211_tx(ifx: wifi_interface_t, buffer: ?*const anyopaque, len: c_int, en_sys_seq: bool) esp_err_t;
-pub const wifi_csi_cb_t = ?*const fn (?*anyopaque, ?*wifi_csi_info_t) callconv(.C) void;
+pub const wifi_csi_cb_t = ?*const fn (?*anyopaque, ?*wifi_csi_info_t) callconv(.c) void;
 pub extern fn esp_wifi_set_csi_rx_cb(cb: wifi_csi_cb_t, ctx: ?*anyopaque) esp_err_t;
 pub extern fn esp_wifi_set_csi_config(config: ?*const wifi_csi_config_t) esp_err_t;
 pub extern fn esp_wifi_set_csi(en: bool) esp_err_t;
@@ -5388,50 +5388,18 @@ pub extern fn esp_wifi_sta_get_negotiated_phymode(phymode: [*c]wifi_phy_mode_t) 
 pub extern fn esp_wifi_set_dynamic_cs(enabled: bool) esp_err_t;
 pub extern fn esp_wifi_sta_get_rssi(rssi: [*c]c_int) esp_err_t;
 
-// ------------------------------ wifi internal STUBS
-pub export fn esp_wifi_internal_set_sta_ip() callconv(.C) esp_err_t {
-    return .ESP_OK;
-}
+// ------------------------------ wifi internal declarations
+pub extern fn esp_wifi_internal_set_sta_ip() esp_err_t;
 
-pub const wifi_netstack_buf_ref_cb_t = ?*const fn (?*anyopaque) callconv(.C) void;
-pub const wifi_netstack_buf_free_cb_t = ?*const fn (?*anyopaque) callconv(.C) void;
-pub export fn esp_wifi_internal_reg_netstack_buf_cb(ref: wifi_netstack_buf_ref_cb_t, free: wifi_netstack_buf_free_cb_t) esp_err_t {
-    _ = ref; // unused
-    _ = free; // unused
-    return .ESP_OK;
-}
+pub const wifi_netstack_buf_ref_cb_t = ?*const fn (?*anyopaque) callconv(.c) void;
+pub const wifi_netstack_buf_free_cb_t = ?*const fn (?*anyopaque) callconv(.c) void;
+pub extern fn esp_wifi_internal_reg_netstack_buf_cb(ref: wifi_netstack_buf_ref_cb_t, free: wifi_netstack_buf_free_cb_t) esp_err_t;
 
-pub export fn esp_wifi_internal_free_rx_buffer(buffer: ?*anyopaque) void {
-    std.c.free(buffer);
-}
-const struct_esp_remote_channel = opaque {};
-pub const esp_remote_channel_t = ?*struct_esp_remote_channel;
-pub const esp_remote_channel_tx_fn_t = ?*const fn (?*anyopaque, ?*anyopaque, usize) callconv(.C) esp_err_t;
-var s_tx_cb: [2]esp_remote_channel_tx_fn_t = std.mem.zeroes([2]esp_remote_channel_tx_fn_t);
-var s_channel: [2]esp_remote_channel_t = std.mem.zeroes([2]esp_remote_channel_t);
-var s_rx_fn: [2]wifi_rxcb_t = std.mem.zeroes([2]wifi_rxcb_t);
-pub const wifi_rxcb_t = ?*const fn (?*anyopaque, u16, ?*anyopaque) callconv(.C) esp_err_t;
+pub extern fn esp_wifi_internal_free_rx_buffer(buffer: ?*anyopaque) void;
 
-pub export fn esp_wifi_internal_tx(ifx: wifi_interface_t, buffer: ?*anyopaque, len: u16) esp_err_t {
-    if (ifx == .WIFI_IF_STA) {
-        return s_tx_cb[@as(c_uint, @intCast(@as(c_int, 0)))].?(@as(?*anyopaque, @ptrCast(s_channel[@as(c_uint, @intCast(@as(c_int, 0)))])), buffer, @as(usize, @bitCast(@as(c_ulong, len))));
-    }
-    if (ifx == .WIFI_IF_AP) {
-        return s_tx_cb[@as(c_uint, @intCast(@as(c_int, 1)))].?(@as(?*anyopaque, @ptrCast(s_channel[@as(c_uint, @intCast(@as(c_int, 1)))])), buffer, @as(usize, @bitCast(@as(c_ulong, len))));
-    }
-    return .ESP_FAIL;
-}
-pub export fn esp_wifi_internal_reg_rxcb(ifx: wifi_interface_t, @"fn": wifi_rxcb_t) esp_err_t {
-    if (ifx == .WIFI_IF_STA) {
-        s_rx_fn[@as(c_uint, @intCast(@as(c_int, 0)))] = @"fn";
-        return .ESP_OK;
-    }
-    if (ifx == .WIFI_IF_AP) {
-        s_rx_fn[@as(c_uint, @intCast(@as(c_int, 1)))] = @"fn";
-        return .ESP_OK;
-    }
-    return .ESP_FAIL;
-}
+pub const wifi_rxcb_t = ?*const fn (?*anyopaque, u16, ?*anyopaque) callconv(.c) esp_err_t;
+pub extern fn esp_wifi_internal_tx(ifx: wifi_interface_t, buffer: ?*anyopaque, len: u16) esp_err_t;
+pub extern fn esp_wifi_internal_reg_rxcb(ifx: wifi_interface_t, @"fn": wifi_rxcb_t) esp_err_t;
 // -------------------------------------------------
 pub const linenoiseCompletions = opaque {};
 pub const esp_console_config_t = extern struct {
@@ -5457,7 +5425,7 @@ pub const esp_console_dev_uart_config_t = extern struct {
 };
 pub extern fn esp_console_init(config: [*c]const esp_console_config_t) esp_err_t;
 pub extern fn esp_console_deinit() esp_err_t;
-pub const esp_console_cmd_func_t = ?*const fn (c_int, [*c][*c]u8) callconv(.C) c_int;
+pub const esp_console_cmd_func_t = ?*const fn (c_int, [*c][*c]u8) callconv(.c) c_int;
 pub const esp_console_cmd_t = extern struct {
     command: [*:0]const u8 = std.mem.zeroes([*:0]const u8),
     help: [*:0]const u8 = std.mem.zeroes([*:0]const u8),
@@ -5473,7 +5441,7 @@ pub extern fn esp_console_get_hint(buf: [*:0]const u8, color: [*c]c_int, bold: [
 pub extern fn esp_console_register_help_command() esp_err_t;
 pub const esp_console_repl_t = esp_console_repl_s;
 pub const esp_console_repl_s = extern struct {
-    del: ?*const fn ([*c]esp_console_repl_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_console_repl_t) callconv(.C) esp_err_t),
+    del: ?*const fn ([*c]esp_console_repl_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_console_repl_t) callconv(.c) esp_err_t),
 };
 pub extern fn esp_console_new_repl_uart(dev_config: [*c]const esp_console_dev_uart_config_t, repl_config: [*c]const esp_console_repl_config_t, ret_repl: [*c][*c]esp_console_repl_t) esp_err_t;
 pub extern fn esp_console_start_repl(repl: [*c]esp_console_repl_t) esp_err_t;
@@ -5507,7 +5475,7 @@ pub extern fn gpio_new_etm_task(config: [*c]const gpio_etm_task_config_t, ret_ta
 pub extern fn gpio_etm_task_add_gpio(task: esp_etm_task_handle_t, gpio_num: c_int) esp_err_t;
 pub extern fn gpio_etm_task_rm_gpio(task: esp_etm_task_handle_t, gpio_num: c_int) esp_err_t;
 pub const gpio_isr_handle_t = intr_handle_t;
-pub const gpio_isr_t = ?*const fn (?*anyopaque) callconv(.C) void;
+pub const gpio_isr_t = ?*const fn (?*anyopaque) callconv(.c) void;
 pub const gpio_config_t = extern struct {
     pin_bit_mask: u64 = std.mem.zeroes(u64),
     mode: gpio_mode_t = std.mem.zeroes(gpio_mode_t),
@@ -5526,7 +5494,7 @@ pub extern fn gpio_set_direction(gpio_num: gpio_num_t, mode: gpio_mode_t) esp_er
 pub extern fn gpio_set_pull_mode(gpio_num: gpio_num_t, pull: gpio_pull_mode_t) esp_err_t;
 pub extern fn gpio_wakeup_enable(gpio_num: gpio_num_t, intr_type: gpio_int_type_t) esp_err_t;
 pub extern fn gpio_wakeup_disable(gpio_num: gpio_num_t) esp_err_t;
-pub extern fn gpio_isr_register(@"fn": ?*const fn (?*anyopaque) callconv(.C) void, arg: ?*anyopaque, intr_alloc_flags: c_int, handle: [*c]gpio_isr_handle_t) esp_err_t;
+pub extern fn gpio_isr_register(@"fn": ?*const fn (?*anyopaque) callconv(.c) void, arg: ?*anyopaque, intr_alloc_flags: c_int, handle: [*c]gpio_isr_handle_t) esp_err_t;
 pub extern fn gpio_pullup_en(gpio_num: gpio_num_t) esp_err_t;
 pub extern fn gpio_pullup_dis(gpio_num: gpio_num_t) esp_err_t;
 pub extern fn gpio_pulldown_en(gpio_num: gpio_num_t) esp_err_t;
@@ -5816,7 +5784,7 @@ pub const spi_transaction_t = extern struct {
     unnamed_0: union_unnamed_100 = std.mem.zeroes(union_unnamed_100),
     unnamed_1: union_unnamed_110 = std.mem.zeroes(union_unnamed_110),
 };
-pub const transaction_cb_t = ?*const fn ([*c]spi_transaction_t) callconv(.C) void;
+pub const transaction_cb_t = ?*const fn ([*c]spi_transaction_t) callconv(.c) void;
 pub const spi_device_interface_config_t = extern struct {
     command_bits: u8 = std.mem.zeroes(u8),
     address_bits: u8 = std.mem.zeroes(u8),
@@ -5937,28 +5905,28 @@ pub const sdmmc_delay_phase_t = enum(c_uint) {
     SDMMC_DELAY_PHASE_3 = 3,
 };
 const union_unnamed_94 = extern union {
-    deinit: ?*const fn () callconv(.C) esp_err_t,
-    deinit_p: ?*const fn (c_int) callconv(.C) esp_err_t,
+    deinit: ?*const fn () callconv(.c) esp_err_t,
+    deinit_p: ?*const fn (c_int) callconv(.c) esp_err_t,
 };
 pub const sdmmc_host_t = extern struct {
     flags: u32 = std.mem.zeroes(u32),
     slot: c_int = std.mem.zeroes(c_int),
     max_freq_khz: c_int = std.mem.zeroes(c_int),
     io_voltage: f32 = std.mem.zeroes(f32),
-    init: ?*const fn () callconv(.C) esp_err_t = std.mem.zeroes(?*const fn () callconv(.C) esp_err_t),
-    set_bus_width: ?*const fn (c_int, usize) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn (c_int, usize) callconv(.C) esp_err_t),
-    get_bus_width: ?*const fn (c_int) callconv(.C) usize = std.mem.zeroes(?*const fn (c_int) callconv(.C) usize),
-    set_bus_ddr_mode: ?*const fn (c_int, bool) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn (c_int, bool) callconv(.C) esp_err_t),
-    set_card_clk: ?*const fn (c_int, u32) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn (c_int, u32) callconv(.C) esp_err_t),
-    set_cclk_always_on: ?*const fn (c_int, bool) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn (c_int, bool) callconv(.C) esp_err_t),
-    do_transaction: ?*const fn (c_int, [*c]sdmmc_command_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn (c_int, [*c]sdmmc_command_t) callconv(.C) esp_err_t),
+    init: ?*const fn () callconv(.c) esp_err_t = std.mem.zeroes(?*const fn () callconv(.c) esp_err_t),
+    set_bus_width: ?*const fn (c_int, usize) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn (c_int, usize) callconv(.c) esp_err_t),
+    get_bus_width: ?*const fn (c_int) callconv(.c) usize = std.mem.zeroes(?*const fn (c_int) callconv(.c) usize),
+    set_bus_ddr_mode: ?*const fn (c_int, bool) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn (c_int, bool) callconv(.c) esp_err_t),
+    set_card_clk: ?*const fn (c_int, u32) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn (c_int, u32) callconv(.c) esp_err_t),
+    set_cclk_always_on: ?*const fn (c_int, bool) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn (c_int, bool) callconv(.c) esp_err_t),
+    do_transaction: ?*const fn (c_int, [*c]sdmmc_command_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn (c_int, [*c]sdmmc_command_t) callconv(.c) esp_err_t),
     unnamed_0: union_unnamed_94 = std.mem.zeroes(union_unnamed_94),
-    io_int_enable: ?*const fn (c_int) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn (c_int) callconv(.C) esp_err_t),
-    io_int_wait: ?*const fn (c_int, TickType_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn (c_int, TickType_t) callconv(.C) esp_err_t),
+    io_int_enable: ?*const fn (c_int) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn (c_int) callconv(.c) esp_err_t),
+    io_int_wait: ?*const fn (c_int, TickType_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn (c_int, TickType_t) callconv(.c) esp_err_t),
     command_timeout_ms: c_int = std.mem.zeroes(c_int),
-    get_real_freq: ?*const fn (c_int, [*c]c_int) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn (c_int, [*c]c_int) callconv(.C) esp_err_t),
+    get_real_freq: ?*const fn (c_int, [*c]c_int) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn (c_int, [*c]c_int) callconv(.c) esp_err_t),
     input_delay_phase: sdmmc_delay_phase_t = std.mem.zeroes(sdmmc_delay_phase_t),
-    set_input_delay: ?*const fn (c_int, sdmmc_delay_phase_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn (c_int, sdmmc_delay_phase_t) callconv(.C) esp_err_t),
+    set_input_delay: ?*const fn (c_int, sdmmc_delay_phase_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn (c_int, sdmmc_delay_phase_t) callconv(.c) esp_err_t),
 };
 pub const esp_phy_wifi_rate_t = enum(c_uint) {
     PHY_RATE_1M = 0,
@@ -6095,11 +6063,11 @@ pub const i2c_slave_dev_handle_t = ?*i2c_slave_dev_t;
 pub const i2c_master_event_data_t = extern struct {
     event: i2c_master_event_t = std.mem.zeroes(i2c_master_event_t),
 };
-pub const i2c_master_callback_t = ?*const fn (i2c_master_dev_handle_t, [*c]const i2c_master_event_data_t, ?*anyopaque) callconv(.C) bool;
+pub const i2c_master_callback_t = ?*const fn (i2c_master_dev_handle_t, [*c]const i2c_master_event_data_t, ?*anyopaque) callconv(.c) bool;
 pub const i2c_slave_rx_done_event_data_t = extern struct {
     buffer: [*:0]u8 = std.mem.zeroes([*:0]u8),
 };
-pub const i2c_slave_received_callback_t = ?*const fn (i2c_slave_dev_handle_t, [*c]const i2c_slave_rx_done_event_data_t, ?*anyopaque) callconv(.C) bool;
+pub const i2c_slave_received_callback_t = ?*const fn (i2c_slave_dev_handle_t, [*c]const i2c_slave_rx_done_event_data_t, ?*anyopaque) callconv(.c) bool;
 
 const i2c_master_bus_config_flags_t = extern struct {
     enable_internal_pullup: bool = false,
@@ -6249,7 +6217,7 @@ pub const i2s_event_data_t = extern struct {
 };
 pub const i2s_channel_obj_t = opaque {};
 pub const i2s_chan_handle_t = ?*i2s_channel_obj_t;
-pub const i2s_isr_callback_t = ?*const fn (i2s_chan_handle_t, [*c]i2s_event_data_t, ?*anyopaque) callconv(.C) bool;
+pub const i2s_isr_callback_t = ?*const fn (i2s_chan_handle_t, [*c]i2s_event_data_t, ?*anyopaque) callconv(.c) bool;
 pub const i2s_event_callbacks_t = extern struct {
     on_recv: i2s_isr_callback_t = std.mem.zeroes(i2s_isr_callback_t),
     on_recv_q_ovf: i2s_isr_callback_t = std.mem.zeroes(i2s_isr_callback_t),
@@ -6496,10 +6464,10 @@ pub const esp_http_server_event_data = extern struct {
 };
 pub const httpd_handle_t = ?*anyopaque;
 pub const httpd_method_t = http_method;
-pub const httpd_free_ctx_fn_t = ?*const fn (?*anyopaque) callconv(.C) void;
-pub const httpd_open_func_t = ?*const fn (httpd_handle_t, c_int) callconv(.C) esp_err_t;
-pub const httpd_close_func_t = ?*const fn (httpd_handle_t, c_int) callconv(.C) void;
-pub const httpd_uri_match_func_t = ?*const fn ([*:0]const u8, [*:0]const u8, usize) callconv(.C) bool;
+pub const httpd_free_ctx_fn_t = ?*const fn (?*anyopaque) callconv(.c) void;
+pub const httpd_open_func_t = ?*const fn (httpd_handle_t, c_int) callconv(.c) esp_err_t;
+pub const httpd_close_func_t = ?*const fn (httpd_handle_t, c_int) callconv(.c) void;
+pub const httpd_uri_match_func_t = ?*const fn ([*:0]const u8, [*:0]const u8, usize) callconv(.c) bool;
 pub const httpd_config_t = extern struct {
     task_priority: c_uint = std.mem.zeroes(c_uint),
     stack_size: usize = std.mem.zeroes(usize),
@@ -6543,7 +6511,7 @@ pub const httpd_req_t = extern struct {
 pub const httpd_uri_t = extern struct {
     uri: [*:0]const u8 = std.mem.zeroes([*:0]const u8),
     method: httpd_method_t = std.mem.zeroes(httpd_method_t),
-    handler: ?*const fn ([*c]httpd_req_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]httpd_req_t) callconv(.C) esp_err_t),
+    handler: ?*const fn ([*c]httpd_req_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]httpd_req_t) callconv(.c) esp_err_t),
     user_ctx: ?*anyopaque = null,
 };
 pub extern fn httpd_register_uri_handler(handle: httpd_handle_t, uri_handler: [*c]const httpd_uri_t) esp_err_t;
@@ -6564,11 +6532,11 @@ pub const httpd_err_code_t = enum(c_uint) {
     HTTPD_431_REQ_HDR_FIELDS_TOO_LARGE = 11,
     HTTPD_ERR_CODE_MAX = 12,
 };
-pub const httpd_err_handler_func_t = ?*const fn ([*c]httpd_req_t, httpd_err_code_t) callconv(.C) esp_err_t;
+pub const httpd_err_handler_func_t = ?*const fn ([*c]httpd_req_t, httpd_err_code_t) callconv(.c) esp_err_t;
 pub extern fn httpd_register_err_handler(handle: httpd_handle_t, @"error": httpd_err_code_t, handler_fn: httpd_err_handler_func_t) esp_err_t;
-pub const httpd_send_func_t = ?*const fn (httpd_handle_t, c_int, [*:0]const u8, usize, c_int) callconv(.C) c_int;
-pub const httpd_recv_func_t = ?*const fn (httpd_handle_t, c_int, [*:0]u8, usize, c_int) callconv(.C) c_int;
-pub const httpd_pending_func_t = ?*const fn (httpd_handle_t, c_int) callconv(.C) c_int;
+pub const httpd_send_func_t = ?*const fn (httpd_handle_t, c_int, [*:0]const u8, usize, c_int) callconv(.c) c_int;
+pub const httpd_recv_func_t = ?*const fn (httpd_handle_t, c_int, [*:0]u8, usize, c_int) callconv(.c) c_int;
+pub const httpd_pending_func_t = ?*const fn (httpd_handle_t, c_int) callconv(.c) c_int;
 pub extern fn httpd_sess_set_recv_override(hd: httpd_handle_t, sockfd: c_int, recv_func: httpd_recv_func_t) esp_err_t;
 pub extern fn httpd_sess_set_send_override(hd: httpd_handle_t, sockfd: c_int, send_func: httpd_send_func_t) esp_err_t;
 pub extern fn httpd_sess_set_pending_override(hd: httpd_handle_t, sockfd: c_int, pending_func: httpd_pending_func_t) esp_err_t;
@@ -6585,23 +6553,23 @@ pub extern fn httpd_req_get_cookie_val(req: [*c]httpd_req_t, cookie_name: [*:0]c
 pub extern fn httpd_uri_match_wildcard(uri_template: [*:0]const u8, uri_to_match: [*:0]const u8, match_upto: usize) bool;
 pub extern fn httpd_resp_send(r: [*c]httpd_req_t, buf: [*:0]const u8, buf_len: isize) esp_err_t;
 pub extern fn httpd_resp_send_chunk(r: [*c]httpd_req_t, buf: [*:0]const u8, buf_len: isize) esp_err_t;
-pub fn httpd_resp_sendstr(r: [*c]httpd_req_t, str: [*:0]const u8) callconv(.C) esp_err_t {
+pub fn httpd_resp_sendstr(r: [*c]httpd_req_t, str: [*:0]const u8) callconv(.c) esp_err_t {
     return httpd_resp_send(r, str, std.mem.len(str));
 }
-pub fn httpd_resp_sendstr_chunk(r: [*c]httpd_req_t, str: [*:0]const u8) callconv(.C) esp_err_t {
+pub fn httpd_resp_sendstr_chunk(r: [*c]httpd_req_t, str: [*:0]const u8) callconv(.c) esp_err_t {
     return httpd_resp_send_chunk(r, str, std.mem.len(str));
 }
 pub extern fn httpd_resp_set_status(r: [*c]httpd_req_t, status: [*:0]const u8) esp_err_t;
 pub extern fn httpd_resp_set_type(r: [*c]httpd_req_t, @"type": [*:0]const u8) esp_err_t;
 pub extern fn httpd_resp_set_hdr(r: [*c]httpd_req_t, field: [*:0]const u8, value: [*:0]const u8) esp_err_t;
 pub extern fn httpd_resp_send_err(req: [*c]httpd_req_t, @"error": httpd_err_code_t, msg: [*:0]const u8) esp_err_t;
-pub fn httpd_resp_send_404(r: [*c]httpd_req_t) callconv(.C) esp_err_t {
+pub fn httpd_resp_send_404(r: [*c]httpd_req_t) callconv(.c) esp_err_t {
     return httpd_resp_send_err(r, .HTTPD_404_NOT_FOUND, "Error: 404 Not Found");
 }
-pub fn httpd_resp_send_408(r: [*c]httpd_req_t) callconv(.C) esp_err_t {
+pub fn httpd_resp_send_408(r: [*c]httpd_req_t) callconv(.c) esp_err_t {
     return httpd_resp_send_err(r, .HTTPD_408_REQ_TIMEOUT, "Error: 408 Request Timeout");
 }
-pub fn httpd_resp_send_500(r: [*c]httpd_req_t) callconv(.C) esp_err_t {
+pub fn httpd_resp_send_500(r: [*c]httpd_req_t) callconv(.c) esp_err_t {
     return httpd_resp_send_err(r, .HTTPD_500_INTERNAL_SERVER_ERROR, "Error: 500 Internal Server");
 }
 pub extern fn httpd_send(r: [*c]httpd_req_t, buf: [*:0]const u8, buf_len: usize) c_int;
@@ -6616,7 +6584,7 @@ pub extern fn httpd_get_global_transport_ctx(handle: httpd_handle_t) ?*anyopaque
 pub extern fn httpd_sess_trigger_close(handle: httpd_handle_t, sockfd: c_int) esp_err_t;
 pub extern fn httpd_sess_update_lru_counter(handle: httpd_handle_t, sockfd: c_int) esp_err_t;
 pub extern fn httpd_get_client_list(handle: httpd_handle_t, fds: [*c]usize, client_fds: [*c]c_int) esp_err_t;
-pub const httpd_work_fn_t = ?*const fn (?*anyopaque) callconv(.C) void;
+pub const httpd_work_fn_t = ?*const fn (?*anyopaque) callconv(.c) void;
 pub extern fn httpd_queue_work(handle: httpd_handle_t, work: httpd_work_fn_t, arg: ?*anyopaque) esp_err_t;
 
 pub const esp_http_client_on_data = extern struct {
@@ -6654,7 +6622,7 @@ pub const esp_http_client_proto_ver_t = enum(c_uint) {
     ESP_HTTP_CLIENT_TLS_VER_TLS_1_3 = 2,
     ESP_HTTP_CLIENT_TLS_VER_MAX = 3,
 };
-pub const http_event_handle_cb = ?*const fn ([*c]esp_http_client_event_t) callconv(.C) esp_err_t;
+pub const http_event_handle_cb = ?*const fn ([*c]esp_http_client_event_t) callconv(.c) esp_err_t;
 pub const esp_http_client_method_t = enum(c_uint) {
     HTTP_METHOD_GET = 0,
     HTTP_METHOD_POST = 1,
@@ -6718,7 +6686,7 @@ pub const esp_http_client_config_t = extern struct {
     use_global_ca_store: bool = std.mem.zeroes(bool),
     skip_cert_common_name_check: bool = std.mem.zeroes(bool),
     common_name: [*:0]const u8 = std.mem.zeroes([*:0]const u8),
-    crt_bundle_attach: ?*const fn (?*anyopaque) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn (?*anyopaque) callconv(.C) esp_err_t),
+    crt_bundle_attach: ?*const fn (?*anyopaque) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn (?*anyopaque) callconv(.c) esp_err_t),
     keep_alive_enable: bool = std.mem.zeroes(bool),
     keep_alive_idle: c_int = std.mem.zeroes(c_int),
     keep_alive_interval: c_int = std.mem.zeroes(c_int),
@@ -6818,10 +6786,10 @@ pub const esp_eth_state_t = enum(c_uint) {
     ETH_STATE_PAUSE = 5,
 };
 pub const esp_eth_mediator_t = extern struct {
-    phy_reg_read: ?*const fn ([*c]esp_eth_mediator_t, u32, u32, [*c]u32) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mediator_t, u32, u32, [*c]u32) callconv(.C) esp_err_t),
-    phy_reg_write: ?*const fn ([*c]esp_eth_mediator_t, u32, u32, u32) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mediator_t, u32, u32, u32) callconv(.C) esp_err_t),
-    stack_input: ?*const fn ([*c]esp_eth_mediator_t, [*:0]u8, u32) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mediator_t, [*:0]u8, u32) callconv(.C) esp_err_t),
-    on_state_changed: ?*const fn ([*c]esp_eth_mediator_t, esp_eth_state_t, ?*anyopaque) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mediator_t, esp_eth_state_t, ?*anyopaque) callconv(.C) esp_err_t),
+    phy_reg_read: ?*const fn ([*c]esp_eth_mediator_t, u32, u32, [*c]u32) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mediator_t, u32, u32, [*c]u32) callconv(.c) esp_err_t),
+    phy_reg_write: ?*const fn ([*c]esp_eth_mediator_t, u32, u32, u32) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mediator_t, u32, u32, u32) callconv(.c) esp_err_t),
+    stack_input: ?*const fn ([*c]esp_eth_mediator_t, [*:0]u8, u32) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mediator_t, [*:0]u8, u32) callconv(.c) esp_err_t),
+    on_state_changed: ?*const fn ([*c]esp_eth_mediator_t, esp_eth_state_t, ?*anyopaque) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mediator_t, esp_eth_state_t, ?*anyopaque) callconv(.c) esp_err_t),
 };
 pub const eth_event_t = enum(c_uint) {
     ETHERNET_EVENT_START = 0,
@@ -6831,26 +6799,26 @@ pub const eth_event_t = enum(c_uint) {
 };
 pub extern const ETH_EVENT: esp_event_base_t;
 pub const esp_eth_mac_t = extern struct {
-    set_mediator: ?*const fn ([*c]esp_eth_mac_t, [*c]esp_eth_mediator_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, [*c]esp_eth_mediator_t) callconv(.C) esp_err_t),
-    init: ?*const fn ([*c]esp_eth_mac_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t) callconv(.C) esp_err_t),
-    deinit: ?*const fn ([*c]esp_eth_mac_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t) callconv(.C) esp_err_t),
-    start: ?*const fn ([*c]esp_eth_mac_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t) callconv(.C) esp_err_t),
-    stop: ?*const fn ([*c]esp_eth_mac_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t) callconv(.C) esp_err_t),
-    transmit: ?*const fn ([*c]esp_eth_mac_t, [*:0]u8, u32) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, [*:0]u8, u32) callconv(.C) esp_err_t),
-    transmit_vargs: ?*const fn ([*c]esp_eth_mac_t, u32, va_list) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, u32, va_list) callconv(.C) esp_err_t),
-    receive: ?*const fn ([*c]esp_eth_mac_t, [*:0]u8, [*c]u32) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, [*:0]u8, [*c]u32) callconv(.C) esp_err_t),
-    read_phy_reg: ?*const fn ([*c]esp_eth_mac_t, u32, u32, [*c]u32) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, u32, u32, [*c]u32) callconv(.C) esp_err_t),
-    write_phy_reg: ?*const fn ([*c]esp_eth_mac_t, u32, u32, u32) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, u32, u32, u32) callconv(.C) esp_err_t),
-    set_addr: ?*const fn ([*c]esp_eth_mac_t, [*:0]u8) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, [*:0]u8) callconv(.C) esp_err_t),
-    get_addr: ?*const fn ([*c]esp_eth_mac_t, [*:0]u8) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, [*:0]u8) callconv(.C) esp_err_t),
-    set_speed: ?*const fn ([*c]esp_eth_mac_t, eth_speed_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, eth_speed_t) callconv(.C) esp_err_t),
-    set_duplex: ?*const fn ([*c]esp_eth_mac_t, eth_duplex_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, eth_duplex_t) callconv(.C) esp_err_t),
-    set_link: ?*const fn ([*c]esp_eth_mac_t, eth_link_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, eth_link_t) callconv(.C) esp_err_t),
-    set_promiscuous: ?*const fn ([*c]esp_eth_mac_t, bool) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, bool) callconv(.C) esp_err_t),
-    enable_flow_ctrl: ?*const fn ([*c]esp_eth_mac_t, bool) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, bool) callconv(.C) esp_err_t),
-    set_peer_pause_ability: ?*const fn ([*c]esp_eth_mac_t, u32) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, u32) callconv(.C) esp_err_t),
-    custom_ioctl: ?*const fn ([*c]esp_eth_mac_t, u32, ?*anyopaque) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, u32, ?*anyopaque) callconv(.C) esp_err_t),
-    del: ?*const fn ([*c]esp_eth_mac_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t) callconv(.C) esp_err_t),
+    set_mediator: ?*const fn ([*c]esp_eth_mac_t, [*c]esp_eth_mediator_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, [*c]esp_eth_mediator_t) callconv(.c) esp_err_t),
+    init: ?*const fn ([*c]esp_eth_mac_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t) callconv(.c) esp_err_t),
+    deinit: ?*const fn ([*c]esp_eth_mac_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t) callconv(.c) esp_err_t),
+    start: ?*const fn ([*c]esp_eth_mac_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t) callconv(.c) esp_err_t),
+    stop: ?*const fn ([*c]esp_eth_mac_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t) callconv(.c) esp_err_t),
+    transmit: ?*const fn ([*c]esp_eth_mac_t, [*:0]u8, u32) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, [*:0]u8, u32) callconv(.c) esp_err_t),
+    transmit_vargs: ?*const fn ([*c]esp_eth_mac_t, u32, va_list) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, u32, va_list) callconv(.c) esp_err_t),
+    receive: ?*const fn ([*c]esp_eth_mac_t, [*:0]u8, [*c]u32) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, [*:0]u8, [*c]u32) callconv(.c) esp_err_t),
+    read_phy_reg: ?*const fn ([*c]esp_eth_mac_t, u32, u32, [*c]u32) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, u32, u32, [*c]u32) callconv(.c) esp_err_t),
+    write_phy_reg: ?*const fn ([*c]esp_eth_mac_t, u32, u32, u32) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, u32, u32, u32) callconv(.c) esp_err_t),
+    set_addr: ?*const fn ([*c]esp_eth_mac_t, [*:0]u8) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, [*:0]u8) callconv(.c) esp_err_t),
+    get_addr: ?*const fn ([*c]esp_eth_mac_t, [*:0]u8) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, [*:0]u8) callconv(.c) esp_err_t),
+    set_speed: ?*const fn ([*c]esp_eth_mac_t, eth_speed_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, eth_speed_t) callconv(.c) esp_err_t),
+    set_duplex: ?*const fn ([*c]esp_eth_mac_t, eth_duplex_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, eth_duplex_t) callconv(.c) esp_err_t),
+    set_link: ?*const fn ([*c]esp_eth_mac_t, eth_link_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, eth_link_t) callconv(.c) esp_err_t),
+    set_promiscuous: ?*const fn ([*c]esp_eth_mac_t, bool) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, bool) callconv(.c) esp_err_t),
+    enable_flow_ctrl: ?*const fn ([*c]esp_eth_mac_t, bool) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, bool) callconv(.c) esp_err_t),
+    set_peer_pause_ability: ?*const fn ([*c]esp_eth_mac_t, u32) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, u32) callconv(.c) esp_err_t),
+    custom_ioctl: ?*const fn ([*c]esp_eth_mac_t, u32, ?*anyopaque) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t, u32, ?*anyopaque) callconv(.c) esp_err_t),
+    del: ?*const fn ([*c]esp_eth_mac_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_mac_t) callconv(.c) esp_err_t),
 };
 pub const emac_rmii_clock_mode_t = enum(c_uint) {
     EMAC_CLK_DEFAULT = 0,
@@ -6880,10 +6848,10 @@ pub const eth_mac_config_t = extern struct {
 };
 pub const eth_spi_custom_driver_config_t = extern struct {
     config: ?*anyopaque = null,
-    init: ?*const fn (?*const anyopaque) callconv(.C) ?*anyopaque = std.mem.zeroes(?*const fn (?*const anyopaque) callconv(.C) ?*anyopaque),
-    deinit: ?*const fn (?*anyopaque) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn (?*anyopaque) callconv(.C) esp_err_t),
-    read: ?*const fn (?*anyopaque, u32, u32, ?*anyopaque, u32) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn (?*anyopaque, u32, u32, ?*anyopaque, u32) callconv(.C) esp_err_t),
-    write: ?*const fn (?*anyopaque, u32, u32, ?*const anyopaque, u32) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn (?*anyopaque, u32, u32, ?*const anyopaque, u32) callconv(.C) esp_err_t),
+    init: ?*const fn (?*const anyopaque) callconv(.c) ?*anyopaque = std.mem.zeroes(?*const fn (?*const anyopaque) callconv(.c) ?*anyopaque),
+    deinit: ?*const fn (?*anyopaque) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn (?*anyopaque) callconv(.c) esp_err_t),
+    read: ?*const fn (?*anyopaque, u32, u32, ?*anyopaque, u32) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn (?*anyopaque, u32, u32, ?*anyopaque, u32) callconv(.c) esp_err_t),
+    write: ?*const fn (?*anyopaque, u32, u32, ?*const anyopaque, u32) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn (?*anyopaque, u32, u32, ?*const anyopaque, u32) callconv(.c) esp_err_t),
 };
 pub const eth_phy_autoneg_cmd_t = enum(c_uint) {
     ESP_ETH_PHY_AUTONEGO_RESTART = 0,
@@ -6892,22 +6860,22 @@ pub const eth_phy_autoneg_cmd_t = enum(c_uint) {
     ESP_ETH_PHY_AUTONEGO_G_STAT = 3,
 };
 pub const esp_eth_phy_t = extern struct {
-    set_mediator: ?*const fn ([*c]esp_eth_phy_t, [*c]esp_eth_mediator_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t, [*c]esp_eth_mediator_t) callconv(.C) esp_err_t),
-    reset: ?*const fn ([*c]esp_eth_phy_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t) callconv(.C) esp_err_t),
-    reset_hw: ?*const fn ([*c]esp_eth_phy_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t) callconv(.C) esp_err_t),
-    init: ?*const fn ([*c]esp_eth_phy_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t) callconv(.C) esp_err_t),
-    deinit: ?*const fn ([*c]esp_eth_phy_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t) callconv(.C) esp_err_t),
-    autonego_ctrl: ?*const fn ([*c]esp_eth_phy_t, eth_phy_autoneg_cmd_t, [*c]bool) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t, eth_phy_autoneg_cmd_t, [*c]bool) callconv(.C) esp_err_t),
-    get_link: ?*const fn ([*c]esp_eth_phy_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t) callconv(.C) esp_err_t),
-    pwrctl: ?*const fn ([*c]esp_eth_phy_t, bool) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t, bool) callconv(.C) esp_err_t),
-    set_addr: ?*const fn ([*c]esp_eth_phy_t, u32) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t, u32) callconv(.C) esp_err_t),
-    get_addr: ?*const fn ([*c]esp_eth_phy_t, [*c]u32) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t, [*c]u32) callconv(.C) esp_err_t),
-    advertise_pause_ability: ?*const fn ([*c]esp_eth_phy_t, u32) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t, u32) callconv(.C) esp_err_t),
-    loopback: ?*const fn ([*c]esp_eth_phy_t, bool) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t, bool) callconv(.C) esp_err_t),
-    set_speed: ?*const fn ([*c]esp_eth_phy_t, eth_speed_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t, eth_speed_t) callconv(.C) esp_err_t),
-    set_duplex: ?*const fn ([*c]esp_eth_phy_t, eth_duplex_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t, eth_duplex_t) callconv(.C) esp_err_t),
-    custom_ioctl: ?*const fn ([*c]esp_eth_phy_t, u32, ?*anyopaque) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t, u32, ?*anyopaque) callconv(.C) esp_err_t),
-    del: ?*const fn ([*c]esp_eth_phy_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t) callconv(.C) esp_err_t),
+    set_mediator: ?*const fn ([*c]esp_eth_phy_t, [*c]esp_eth_mediator_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t, [*c]esp_eth_mediator_t) callconv(.c) esp_err_t),
+    reset: ?*const fn ([*c]esp_eth_phy_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t) callconv(.c) esp_err_t),
+    reset_hw: ?*const fn ([*c]esp_eth_phy_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t) callconv(.c) esp_err_t),
+    init: ?*const fn ([*c]esp_eth_phy_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t) callconv(.c) esp_err_t),
+    deinit: ?*const fn ([*c]esp_eth_phy_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t) callconv(.c) esp_err_t),
+    autonego_ctrl: ?*const fn ([*c]esp_eth_phy_t, eth_phy_autoneg_cmd_t, [*c]bool) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t, eth_phy_autoneg_cmd_t, [*c]bool) callconv(.c) esp_err_t),
+    get_link: ?*const fn ([*c]esp_eth_phy_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t) callconv(.c) esp_err_t),
+    pwrctl: ?*const fn ([*c]esp_eth_phy_t, bool) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t, bool) callconv(.c) esp_err_t),
+    set_addr: ?*const fn ([*c]esp_eth_phy_t, u32) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t, u32) callconv(.c) esp_err_t),
+    get_addr: ?*const fn ([*c]esp_eth_phy_t, [*c]u32) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t, [*c]u32) callconv(.c) esp_err_t),
+    advertise_pause_ability: ?*const fn ([*c]esp_eth_phy_t, u32) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t, u32) callconv(.c) esp_err_t),
+    loopback: ?*const fn ([*c]esp_eth_phy_t, bool) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t, bool) callconv(.c) esp_err_t),
+    set_speed: ?*const fn ([*c]esp_eth_phy_t, eth_speed_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t, eth_speed_t) callconv(.c) esp_err_t),
+    set_duplex: ?*const fn ([*c]esp_eth_phy_t, eth_duplex_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t, eth_duplex_t) callconv(.c) esp_err_t),
+    custom_ioctl: ?*const fn ([*c]esp_eth_phy_t, u32, ?*anyopaque) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t, u32, ?*anyopaque) callconv(.c) esp_err_t),
+    del: ?*const fn ([*c]esp_eth_phy_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn ([*c]esp_eth_phy_t) callconv(.c) esp_err_t),
 };
 pub const eth_phy_config_t = extern struct {
     phy_addr: i32 = std.mem.zeroes(i32),
@@ -6925,11 +6893,11 @@ pub const esp_eth_config_t = extern struct {
     mac: [*c]esp_eth_mac_t = std.mem.zeroes([*c]esp_eth_mac_t),
     phy: [*c]esp_eth_phy_t = std.mem.zeroes([*c]esp_eth_phy_t),
     check_link_period_ms: u32 = std.mem.zeroes(u32),
-    stack_input: ?*const fn (esp_eth_handle_t, [*:0]u8, u32, ?*anyopaque) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn (esp_eth_handle_t, [*:0]u8, u32, ?*anyopaque) callconv(.C) esp_err_t),
-    on_lowlevel_init_done: ?*const fn (esp_eth_handle_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn (esp_eth_handle_t) callconv(.C) esp_err_t),
-    on_lowlevel_deinit_done: ?*const fn (esp_eth_handle_t) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn (esp_eth_handle_t) callconv(.C) esp_err_t),
-    read_phy_reg: ?*const fn (esp_eth_handle_t, u32, u32, [*c]u32) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn (esp_eth_handle_t, u32, u32, [*c]u32) callconv(.C) esp_err_t),
-    write_phy_reg: ?*const fn (esp_eth_handle_t, u32, u32, u32) callconv(.C) esp_err_t = std.mem.zeroes(?*const fn (esp_eth_handle_t, u32, u32, u32) callconv(.C) esp_err_t),
+    stack_input: ?*const fn (esp_eth_handle_t, [*:0]u8, u32, ?*anyopaque) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn (esp_eth_handle_t, [*:0]u8, u32, ?*anyopaque) callconv(.c) esp_err_t),
+    on_lowlevel_init_done: ?*const fn (esp_eth_handle_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn (esp_eth_handle_t) callconv(.c) esp_err_t),
+    on_lowlevel_deinit_done: ?*const fn (esp_eth_handle_t) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn (esp_eth_handle_t) callconv(.c) esp_err_t),
+    read_phy_reg: ?*const fn (esp_eth_handle_t, u32, u32, [*c]u32) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn (esp_eth_handle_t, u32, u32, [*c]u32) callconv(.c) esp_err_t),
+    write_phy_reg: ?*const fn (esp_eth_handle_t, u32, u32, u32) callconv(.c) esp_err_t = std.mem.zeroes(?*const fn (esp_eth_handle_t, u32, u32, u32) callconv(.c) esp_err_t),
 };
 pub const esp_eth_io_cmd_t = enum(c_uint) {
     ETH_CMD_G_MAC_ADDR = 0,
@@ -6952,7 +6920,7 @@ pub extern fn esp_eth_driver_install(config: [*c]const esp_eth_config_t, out_hdl
 pub extern fn esp_eth_driver_uninstall(hdl: esp_eth_handle_t) esp_err_t;
 pub extern fn esp_eth_start(hdl: esp_eth_handle_t) esp_err_t;
 pub extern fn esp_eth_stop(hdl: esp_eth_handle_t) esp_err_t;
-pub extern fn esp_eth_update_input_path(hdl: esp_eth_handle_t, stack_input: ?*const fn (esp_eth_handle_t, [*:0]u8, u32, ?*anyopaque) callconv(.C) esp_err_t, priv: ?*anyopaque) esp_err_t;
+pub extern fn esp_eth_update_input_path(hdl: esp_eth_handle_t, stack_input: ?*const fn (esp_eth_handle_t, [*:0]u8, u32, ?*anyopaque) callconv(.c) esp_err_t, priv: ?*anyopaque) esp_err_t;
 pub extern fn esp_eth_transmit(hdl: esp_eth_handle_t, buf: ?*anyopaque, length: usize) esp_err_t;
 pub extern fn esp_eth_transmit_vargs(hdl: esp_eth_handle_t, argc: u32, ...) esp_err_t;
 pub extern fn esp_eth_ioctl(hdl: esp_eth_handle_t, cmd: esp_eth_io_cmd_t, data: ?*anyopaque) esp_err_t;
@@ -6966,8 +6934,8 @@ pub extern fn esp_crypto_sha1(input: [*:0]const u8, ilen: usize, output: [*:0]u8
 pub extern fn esp_crypto_base64_encode(dst: [*:0]u8, dlen: usize, olen: [*c]usize, src: [*:0]const u8, slen: usize) c_int;
 // /espressif/esp-idf/components/http_parser/http_parser.h:224:16: warning: struct demoted to opaque type - has bitfield
 pub const http_parser = opaque {};
-pub const http_cb = ?*const fn (?*http_parser) callconv(.C) c_int;
-pub const http_data_cb = ?*const fn (?*http_parser, [*:0]const u8, usize) callconv(.C) c_int;
+pub const http_cb = ?*const fn (?*http_parser) callconv(.c) c_int;
+pub const http_data_cb = ?*const fn (?*http_parser, [*:0]const u8, usize) callconv(.c) c_int;
 pub const http_parser_settings = extern struct {
     on_message_begin: http_cb = std.mem.zeroes(http_cb),
     on_url: http_data_cb = std.mem.zeroes(http_data_cb),
@@ -7127,8 +7095,8 @@ pub const esp_now_rate_config = extern struct {
     ersu: bool = std.mem.zeroes(bool),
 };
 pub const esp_now_rate_config_t = esp_now_rate_config;
-pub const esp_now_recv_cb_t = ?*const fn ([*c]const esp_now_recv_info_t, [*:0]const u8, c_int) callconv(.C) void;
-pub const esp_now_send_cb_t = ?*const fn ([*:0]const u8, esp_now_send_status_t) callconv(.C) void;
+pub const esp_now_recv_cb_t = ?*const fn ([*c]const esp_now_recv_info_t, [*:0]const u8, c_int) callconv(.c) void;
+pub const esp_now_send_cb_t = ?*const fn ([*:0]const u8, esp_now_send_status_t) callconv(.c) void;
 pub extern fn esp_now_init() esp_err_t;
 pub extern fn esp_now_deinit() esp_err_t;
 pub extern fn esp_now_get_version(version: [*c]u32) esp_err_t;
@@ -7256,7 +7224,7 @@ pub const esp_https_ota_event_t = enum(c_uint) {
     ESP_HTTPS_OTA_ABORT = 8,
 };
 pub const esp_https_ota_handle_t = ?*anyopaque;
-pub const http_client_init_cb_t = ?*const fn (esp_http_client_handle_t) callconv(.C) esp_err_t;
+pub const http_client_init_cb_t = ?*const fn (esp_http_client_handle_t) callconv(.c) esp_err_t;
 pub const esp_https_ota_config_t = extern struct {
     http_config: [*c]const esp_http_client_config_t = std.mem.zeroes([*c]const esp_http_client_config_t),
     http_client_init_cb: http_client_init_cb_t = std.mem.zeroes(http_client_init_cb_t),
@@ -7297,7 +7265,7 @@ pub const pcnt_watch_event_data_t = extern struct {
     watch_point_value: c_int = std.mem.zeroes(c_int),
     zero_cross_mode: pcnt_unit_zero_cross_mode_t = std.mem.zeroes(pcnt_unit_zero_cross_mode_t),
 };
-pub const pcnt_watch_cb_t = ?*const fn (pcnt_unit_handle_t, [*c]const pcnt_watch_event_data_t, ?*anyopaque) callconv(.C) bool;
+pub const pcnt_watch_cb_t = ?*const fn (pcnt_unit_handle_t, [*c]const pcnt_watch_event_data_t, ?*anyopaque) callconv(.c) bool;
 pub const pcnt_event_callbacks_t = extern struct {
     on_reach: pcnt_watch_cb_t = std.mem.zeroes(pcnt_watch_cb_t),
 };
