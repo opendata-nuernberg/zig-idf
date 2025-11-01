@@ -11,7 +11,7 @@ This project aims to integrate Zig language and toolchain with the [Espressif Io
 
 ## Prerequisites
 
-- [Zig](https://ziglang.org/download) toolchain - v0.13.0 or master
+- [Zig](https://ziglang.org/download) toolchain - v0.15.0 or master
 - [ESP-IDF](https://github.com/espressif/esp-idf) - v4.4.x or v5.x or master
 
 ## How to build
