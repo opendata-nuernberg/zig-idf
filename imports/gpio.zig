@@ -39,7 +39,7 @@ pub const Level = struct {
         return try errors.espCheckError(sys.gpio_set_level(gpio_num, level));
     }
     pub fn get(gpio_num: sys.gpio_num_t) bool {
-        return @as(bool, sys.gpio_get_level(gpio_num));
+        return sys.gpio_get_level(gpio_num) != 0;
     }
 };
 pub const Direction = struct {
