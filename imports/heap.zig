@@ -18,6 +18,7 @@ pub const HeapCapsAllocator = struct {
                 .alloc = alloc,
                 .resize = resize,
                 .free = free,
+                .remap = remap,
             },
         };
     }
@@ -43,12 +44,9 @@ pub const HeapCapsAllocator = struct {
         return sys.esp_get_free_internal_heap_size();
     }
 
-    fn alloc(ctx: *anyopaque, len: usize, log2_ptr_align: u8, _: usize) ?[*]u8 {
+    fn alloc(ctx: *anyopaque, len: usize, alignment: std.mem.Alignment, _: usize) ?[*]u8 {
         const self: *Self = @ptrCast(@alignCast(ctx));
-        std.debug.assert(log2_ptr_align <= comptime std.math.log2_int(
-            usize,
-            @alignOf(std.c.max_align_t),
-        ));
+        std.debug.assert(alignment.toByteUnits() <= @alignOf(std.c.max_align_t));
         return @as(?[*]u8, @ptrCast(
             sys.heap_caps_malloc(
                 len,
@@ -57,7 +55,7 @@ pub const HeapCapsAllocator = struct {
         ));
     }
 
-    fn resize(_: *anyopaque, buf: []u8, _: u8, new_len: usize, _: usize) bool {
+    fn resize(_: *anyopaque, buf: []u8, _: std.mem.Alignment, new_len: usize, _: usize) bool {
         if (new_len <= buf.len)
             return true;
 
@@ -68,7 +66,18 @@ pub const HeapCapsAllocator = struct {
         return false;
     }
 
-    fn free(_: *anyopaque, buf: []u8, _: u8, _: usize) void {
+    fn remap(_: *anyopaque, buf: []u8, _: std.mem.Alignment, new_len: usize, _: usize) ?[*]u8 {
+        if (new_len <= buf.len)
+            return buf.ptr;
+
+        const full_len = if (@TypeOf(sys.heap_caps_get_allocated_size) != void)
+            sys.heap_caps_get_allocated_size(buf.ptr);
+        if (new_len <= full_len) return buf.ptr;
+
+        return null;
+    }
+
+    fn free(_: *anyopaque, buf: []u8, _: std.mem.Alignment, _: usize) void {
         std.debug.assert(sys.heap_caps_check_integrity_all(true));
         sys.heap_caps_free(buf.ptr);
     }
@@ -89,6 +98,7 @@ pub const MultiHeapAllocator = struct {
                 .alloc = alloc,
                 .resize = resize,
                 .free = free,
+                .remap = remap,
             },
         };
     }
@@ -103,18 +113,15 @@ pub const MultiHeapAllocator = struct {
         return sys.multi_heap_minimum_free_size(self.multi_heap_alloc);
     }
 
-    fn alloc(ctx: *anyopaque, len: usize, log2_ptr_align: u8, _: usize) ?[*]u8 {
+    fn alloc(ctx: *anyopaque, len: usize, alignment: std.mem.Alignment, _: usize) ?[*]u8 {
         const self: *Self = @ptrCast(@alignCast(ctx));
-        std.debug.assert(log2_ptr_align <= comptime std.math.log2_int(
-            usize,
-            @alignOf(std.c.max_align_t),
-        ));
+        std.debug.assert(alignment.toByteUnits() <= @alignOf(std.c.max_align_t));
         return @as(?[*]u8, @ptrCast(
             sys.multi_heap_malloc(self.multi_heap_alloc, sys.multi_heap_free_size(self.multi_heap_alloc) * len),
         ));
     }
 
-    fn resize(ctx: *anyopaque, buf: []u8, _: u8, new_len: usize, _: usize) bool {
+    fn resize(ctx: *anyopaque, buf: []u8, _: std.mem.Alignment, new_len: usize, _: usize) bool {
         const self: *Self = @ptrCast(@alignCast(ctx));
 
         if (new_len <= buf.len)
@@ -127,7 +134,20 @@ pub const MultiHeapAllocator = struct {
         return false;
     }
 
-    fn free(ctx: *anyopaque, buf: []u8, _: u8, _: usize) void {
+    fn remap(ctx: *anyopaque, buf: []u8, _: std.mem.Alignment, new_len: usize, _: usize) ?[*]u8 {
+        const self: *Self = @ptrCast(@alignCast(ctx));
+
+        if (new_len <= buf.len)
+            return buf.p;
+
+        if (@TypeOf(sys.multi_heap_get_allocated_size) != void)
+            if (new_len <= sys.multi_heap_get_allocated_size(self.multi_heap_alloc, buf.ptr))
+                return buf.p;
+
+        return null;
+    }
+
+    fn free(ctx: *anyopaque, buf: []u8, _: std.mem.Alignment, _: usize) void {
         const self: *Self = @ptrCast(@alignCast(ctx));
         defer std.debug.assert(sys.multi_heap_check(self.multi_heap_alloc, true));
         sys.multi_heap_free(self.multi_heap_alloc, buf.ptr);
@@ -147,6 +167,7 @@ pub const vPortAllocator = struct {
                 .alloc = alloc,
                 .resize = resize,
                 .free = free,
+                .remap = remap,
             },
         };
     }
@@ -158,16 +179,20 @@ pub const vPortAllocator = struct {
         return sys.xPortGetMinimumEverFreeHeapSize();
     }
 
-    fn alloc(_: *anyopaque, len: usize, log2_ptr_align: u8, _: usize) ?[*]u8 {
-        std.debug.assert(log2_ptr_align <= comptime std.math.log2_int(usize, @alignOf(std.c.max_align_t)));
+    fn alloc(_: *anyopaque, len: usize, alignment: std.mem.Alignment, _: usize) ?[*]u8 {
+        std.debug.assert(alignment.toByteUnits() <= @alignOf(std.c.max_align_t));
         return @as(?[*]u8, @ptrCast(sys.pvPortMalloc(len)));
     }
 
-    fn resize(_: *anyopaque, buf: []u8, _: u8, new_len: usize, _: usize) bool {
+    fn resize(_: *anyopaque, buf: []u8, _: std.mem.Alignment, new_len: usize, _: usize) bool {
         return new_len <= buf.len;
     }
 
-    fn free(_: *anyopaque, buf: []u8, _: u8, _: usize) void {
+    fn remap(_: *anyopaque, buf: []u8, _: std.mem.Alignment, new_len: usize, _: usize) ?[*]u8 {
+        return if (new_len <= buf.len) ? (buf.ptr) else null;
+    }
+
+    fn free(_: *anyopaque, buf: []u8, _: std.mem.Alignment, _: usize) void {
         sys.vPortFree(buf.ptr);
     }
 };
