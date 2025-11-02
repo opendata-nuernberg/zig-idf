@@ -91,6 +91,8 @@ fn blinkLED(delay_ms: u32) !void {
 
         log.info("LED: OFF", .{});
         try idf.gpio.Level.set(.GPIO_NUM_18, 0);
+
+        idf.rtos.vTaskDelay(delay_ms / idf.sys.portTICK_PERIOD_MS);
     }
 }
 
