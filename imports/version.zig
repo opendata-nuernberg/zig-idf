@@ -34,18 +34,20 @@ pub const Version = struct {
 
         return final_version;
     }
-    pub fn toString(self: Version, allocator: std.mem.Allocator) []const u8 {
+    pub fn toString(self: Version, allocator: std.mem.Allocator) ![]const u8 {
         const idf_version = std.mem.span(@import("sys").esp_get_idf_version());
 
         // e.g.: v4.0.0 or commit-hash: g5d5f5c3
-        if (!std.mem.startsWith(u8, idf_version, "v"))
-            return idf_version
-        else
-            return std.fmt.allocPrint(allocator, "v{d}.{d}.{d}", .{
-                self.major.?,
-                self.minor.?,
-                self.patch.?,
-            }) catch |err|
-                @panic(@errorName(err));
+        if (!std.mem.startsWith(u8, idf_version, "v")) {
+            return idf_version;
+        } else {
+            var buf: [64]u8 = undefined;
+            const result = try std.fmt.bufPrint(&buf, "{d}.{d}.{d}", .{
+                self.major orelse 9999,
+                self.minor orelse 9999,
+                self.patch orelse 9999,
+            });
+            return try allocator.dupe(u8, result);
+        }
     }
 };
