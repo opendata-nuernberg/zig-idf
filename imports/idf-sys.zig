@@ -2507,6 +2507,7 @@ pub extern fn pvTaskGetCurrentTCBForCore(xCoreID: BaseType_t) ?*anyopaque;
 pub extern fn esp_int_wdt_init() void;
 pub extern fn esp_int_wdt_cpu_init() void;
 pub const portTICK_PERIOD_MS: TickType_t = @as(TickType_t, @divExact(@as(c_int, 1000), configTICK_RATE_HZ));
+pub const portMAX_DELAY = @as(TickType_t, @as(c_ulong, 0xffffffff));
 pub const configTICK_RATE_HZ: c_int = 100;
 pub const StaticRingbuffer_t = extern struct {
     xDummy1: [2]usize = std.mem.zeroes([2]usize),

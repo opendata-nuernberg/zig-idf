@@ -22,3 +22,4 @@ pub const uart = @import("uart");
 pub const ver = @import("ver");
 pub const wifi = @import("wifi");
 pub const sys = @import("sys");
+pub const event = @import("event");

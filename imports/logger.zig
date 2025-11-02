@@ -7,10 +7,6 @@ pub fn espLogFn(
     comptime format: []const u8,
     args: anytype,
 ) void {
-    var heap = std.heap.ArenaAllocator.init(std.heap.raw_c_allocator);
-    defer heap.deinit();
-    const allocator = heap.allocator();
-
     const scope_prefix = "(" ++ switch (scope) {
         .@"esp-idf", default_log_scope => @tagName(scope),
         else => if (@intFromEnum(level) <= @intFromEnum(std.log.Level.err))
@@ -20,19 +16,30 @@ pub fn espLogFn(
     } ++ "): ";
 
     const prefix = default_color ++ "[" ++ comptime level.asText() ++ "] " ++ scope_prefix;
-    ESP_LOG(allocator, "logging", prefix ++ format ++ "\n", args);
+    ESP_LOG("logging", prefix ++ format ++ "\n", args);
 }
 pub const default_level: sys.esp_log_level_t = switch (@import("builtin").mode) {
     .Debug => .ESP_LOG_DEBUG,
     .ReleaseSafe => .ESP_LOG_INFO,
     .ReleaseFast, .ReleaseSmall => .ESP_LOG_ERROR,
 };
-pub fn ESP_LOG(allocator: std.mem.Allocator, comptime tag: [*:0]const u8, comptime fmt: []const u8, args: anytype) void {
-    const buffer = if (isComptime(args))
-        std.fmt.comptimePrint(fmt, args)
-    else
-        std.fmt.allocPrintZ(allocator, fmt, args) catch |err| @panic(@errorName(err));
-    sys.esp_log_write(default_level, tag, buffer, sys.esp_log_timestamp(), tag);
+pub fn ESP_LOG(comptime tag: [*:0]const u8, comptime fmt: []const u8, args: anytype) void {
+    var buf: [384]u8 = undefined; // log line buffer (without NUL)
+    const slice = if (isComptime(args)) blk: {
+        const s = std.fmt.comptimePrint(fmt, args);
+        // Copy into buffer if it fits, else truncate
+        const n = @min(s.len, buf.len - 1);
+        @memcpy(buf[0..n], s[0..n]);
+        break :blk buf[0..n];
+    } else std.fmt.bufPrint(&buf, fmt, args) catch |err| switch (err) {
+        error.NoSpaceLeft => buf[0 .. buf.len - 1],
+    };
+
+    // Ensure NUL termination for C API
+    buf[slice.len] = 0;
+    const cstr: [*:0]const u8 = @ptrCast(&buf);
+
+    sys.esp_log_write(default_level, tag, cstr, sys.esp_log_timestamp(), tag);
 }
 pub const default_color = switch (default_level) {
     .ESP_LOG_DEBUG => LOG_COLOR(LOG_COLOR_BLUE),

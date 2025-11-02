@@ -474,6 +474,23 @@ pub fn idf_wrapped_modules(b: *std.Build) *std.Build.Module {
             },
         },
     });
+    const event = b.addModule("event", .{
+        .root_source_file = b.path(b.pathJoin(&.{
+            src_path,
+            "imports",
+            "event.zig",
+        })),
+        .imports = &.{
+            .{
+                .name = "sys",
+                .module = sys,
+            },
+            .{
+                .name = "error",
+                .module = errors,
+            },
+        },
+    });
     return b.addModule("zig_idf", .{
         .root_source_file = b.path(b.pathJoin(&.{
             src_path,
@@ -576,6 +593,10 @@ pub fn idf_wrapped_modules(b: *std.Build) *std.Build.Module {
             .{
                 .name = "sys",
                 .module = sys,
+            },
+            .{
+                .name = "event",
+                .module = event,
             },
         },
     });
