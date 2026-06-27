@@ -18,8 +18,6 @@ pub fn build(b: *std.Build) !void {
     });
     lib.root_module.addImport("zig_idf", idf_wrapped_modules(b));
 
-    lib.linkLibC(); // stubs for libc
-
     b.installArtifact(lib);
 }
 

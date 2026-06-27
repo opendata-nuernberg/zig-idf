@@ -38,7 +38,7 @@ else()
 endif()
 
 if(NOT EXISTS "${CMAKE_BINARY_DIR}/zig-relsafe-${TARGET_ARCH}-${TARGET_PLATFORM}-baseline")
-    file(DOWNLOAD "https://github.com/kaans/zig-espressif-bootstrap/releases/download/0.15.1-xtensa/zig-relsafe-${TARGET_ARCH}-${TARGET_PLATFORM}-baseline.${EXT}"
+    file(DOWNLOAD "https://github.com/kassane/zig-espressif-bootstrap/releases/download/0.16.0-xtensa/zig-relsafe-${TARGET_ARCH}-${TARGET_PLATFORM}-baseline.${EXT}"
             "${CMAKE_BINARY_DIR}/zig.${EXT}")
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -96,7 +96,7 @@ add_custom_target(zig_build
         -Dtarget=${ZIG_TARGET}
         -Dcpu=${TARGET_CPU_MODEL}
         -freference-trace
-        --prominent-compile-errors
+        --error-style minimal
         --cache-dir ${CMAKE_BINARY_DIR}/../.zig-cache
         --prefix ${CMAKE_BINARY_DIR}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

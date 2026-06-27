@@ -1,7 +1,8 @@
 .{
     .name = .ZigIdf,
     .version = "0.1.0",
-    .minimum_zig_version = "0.12.0",
+    .minimum_zig_version = "0.16.0",
+    .fingerprint = 0xf40f8c3597f41e5a,
     // This field is optional.
     // Each dependency must either provide a `url` and `hash`, or a `path`.
     // `zig build --fetch` can be used to fetch all dependencies of a package, recursively.
